@@ -1,0 +1,16 @@
+package models
+
+import (
+
+	"github.com/google/uuid"
+)
+
+type Customer struct {
+	ID uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primary_key"`
+	// ID     uint   `gorm:"primary_key"`
+	Username	string	`gorm:"type:varchar(55);not null"`
+	Phone		string	`gorm:"type:varchar(55);not null"`
+	Email		string	`gorm:"type:varchar(55);uniqueIndex;not null"`
+	Location	string	`gorm:"not null"`
+}
+
