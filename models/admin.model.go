@@ -1,8 +1,6 @@
 package models
 
-import (
-	"github.com/google/uuid"
-)
+import "github.com/satori/go.uuid"
 
 type Admin struct {
 	ID       uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primary_key"`

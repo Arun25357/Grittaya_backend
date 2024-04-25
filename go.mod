@@ -4,7 +4,6 @@ go 1.22.2
 
 require (
 	github.com/gin-gonic/gin v1.9.1
-	github.com/google/uuid v1.6.0
 	github.com/spf13/viper v1.18.2
 	gorm.io/driver/postgres v1.5.7
 	gorm.io/gorm v1.25.9
@@ -40,6 +39,7 @@ require (
 	github.com/pelletier/go-toml/v2 v2.2.0 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
+	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
