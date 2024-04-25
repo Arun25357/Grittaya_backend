@@ -9,8 +9,14 @@ type Admin struct {
 	Username string    `gorm:"type:varchar(55);uniqueIndex;not null"`
 	Password string    `gorm:"not null"`
 	Nickname string    `gorm:"type:varchar(25)"`
-	Position string    `gorm:"not null"`
-	Phone    string    `gorm:"type:varchar(15);not null"`
+	Position int       `gorm:"not null"`
+	Phone    string    `gorm:"type:varchar(10);not null"`
+}
+
+type AdminSignUpInput struct {
+	Username        string `json:"username" binding:"required"`
+	Password        string `json:"password" binding:"required"`
+	ConfirmPassword string `json:"confirmPassword" binding:"required"`
 }
 
 type AdminSignInInput struct {
@@ -26,7 +32,7 @@ type GetAdmin struct {
 }
 
 type ForgotAdminPasswordInput struct {
-	Phone string `gorm:"type:varchar(15);not null"`
+	Phone string `gorm:"type:varchar(10);not null"`
 }
 
 type ResetAdminPasswordInput struct {
