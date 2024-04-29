@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -151,37 +152,33 @@ func GetUserIDByToken(ctx *gin.Context) (response string) {
 	return useridstring
 }
 
-func (ac *AuthController) GetUserDataByToken(ctx *gin.Context) (res models.Admin) {
-	authorizationHeader := ctx.GetHeader("Authorization")
-	if authorizationHeader == "" {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
+func (ac *AuthController) GetUserDataByToken(ctx *gin.Context) (models.Admin, error) {
+    authorizationHeader := ctx.GetHeader("Authorization")
+    if authorizationHeader == "" {
+        return models.Admin{}, errors.New("unauthorized: missing Authorization header")
+    }
 
-	fields := strings.Fields(authorizationHeader)
-	if len(fields) != 2 || fields[0] != "Bearer" {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
+    fields := strings.Fields(authorizationHeader)
+    if len(fields) != 2 || fields[0] != "Bearer" {
+        return models.Admin{}, errors.New("unauthorized: invalid Authorization header format")
+    }
 
-	config, err := initializers.LoadConfig(".")
-	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
-		return
-	}
+    config, err := initializers.LoadConfig(".")
+    if err != nil {
+        return models.Admin{}, errors.New("internal server error: failed to load config")
+    }
 
-	sub, err := utils.ValidateToken(fields[1], config.TokenSecret)
-	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
+    sub, err := utils.ValidateToken(fields[1], config.TokenSecret)
+    if err != nil {
+        return models.Admin{}, errors.New("unauthorized: invalid token")
+    }
 
-	userID := fmt.Sprint(sub)
-	var user models.Admin
-	if err := ac.DB.First(&user, "id = ?", userID).Error; err != nil {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "User not found"})
-		return
-	}
+    userID := fmt.Sprint(sub)
+    var user models.Admin
+    if err := ac.DB.First(&user, "id = ?", userID).Error; err != nil {
+        return models.Admin{}, errors.New("user not found")
+    }
 
-	return user
+    return user, nil
 }
+
