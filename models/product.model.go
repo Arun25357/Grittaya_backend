@@ -12,16 +12,16 @@ type Product struct {
 
 type CreateProduct struct {
 	ID        uuid.UUID
-	Name      string `gorm:"type:varchar(55);not null"`
-	Amount    int    `gorm:"not null"`
-	UnitPrice int    `gorm:"not null"`
-	Type      string `gorm:"type:varchar(15);not null"`
+	Name      string `jorm:"type:varchar(55);not null"`
+	Amount    int    `jorm:"not null"`
+	UnitPrice int    `jorm:"not null"`
+	Type      string `jorm:"type:varchar(15);not null"`
 }
 
 type UpdateProduct struct {
-	Name      string `gorm:"type:varchar(55);not null"`
-	Amount    int    `gorm:"not null"`
-	UnitPrice int    `gorm:"not null"`
+	Name      string `jorm:"type:varchar(55);not null"`
+	Amount    int    `jorm:"not null"`
+	UnitPrice int    `jorm:"not null"`
 }
 
 type DeleteProduct struct {
