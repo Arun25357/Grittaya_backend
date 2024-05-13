@@ -1,8 +1,6 @@
 package models
 
-import (
-	"github.com/satori/go.uuid"
-)
+import uuid "github.com/satori/go.uuid"
 
 type Customer struct {
 	ID       uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primary_key"`
@@ -10,4 +8,5 @@ type Customer struct {
 	Phone    string    `gorm:"type:varchar(15);not null"`
 	Email    string    `gorm:"type:varchar(55);uniqueIndex;not null"`
 	Location string    `gorm:"not null"`
+	Postcode string    `gorm:"not null"`
 }
