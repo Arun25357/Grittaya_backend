@@ -1,8 +1,8 @@
 package models
 
-import "github.com/satori/go.uuid"
+import uuid "github.com/satori/go.uuid"
 
-type Admin struct {
+type User struct {
 	ID       uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primary_key"`
 	Username string    `gorm:"type:varchar(55);uniqueIndex;not null"`
 	Password string    `gorm:"not null"`
@@ -11,29 +11,29 @@ type Admin struct {
 	Phone    string    `gorm:"type:varchar(10);not null"`
 }
 
-type AdminSignUpInput struct {
+type UserSignUpInput struct {
 	Username        string `json:"username" binding:"required"`
 	Password        string `json:"password" binding:"required"`
 	ConfirmPassword string `json:"confirmPassword" binding:"required"`
 }
 
-type AdminSignInInput struct {
+type UserSignInInput struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
 
-type GetAdmin struct {
+type GetUser struct {
 	ID       uuid.UUID
 	Username string `json:"username,omitempty"`
 	Nickname string `json:"type:varchar(25)"`
 	Position string `json:"not null"`
 }
 
-type ForgotAdminPasswordInput struct {
+type ForgotUserPasswordInput struct {
 	Phone string `gorm:"type:varchar(10);not null"`
 }
 
-type ResetAdminPasswordInput struct {
+type ResetUserPasswordInput struct {
 	Password        string `gorm:"password" binding:"required,min=8"`
 	PasswordConfirm string `gorm:"passwordConfirm" binding:"required"`
 }

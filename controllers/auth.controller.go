@@ -25,7 +25,7 @@ func NewAuthController(DB *gorm.DB) AuthController {
 
 // [...] SignUp User
 func (ac *AuthController) SignUpUser(ctx *gin.Context) {
-	var payload *models.AdminSignUpInput
+	var payload *models.UserSignUpInput
 
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
@@ -43,7 +43,7 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 		return
 	}
 
-	newUser := models.Admin{
+	newUser := models.User{
 		Username: payload.Username,
 		Password: hashedPassword,
 		Position: int(constants.Admin),
@@ -65,23 +65,22 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 
 // [...] SignIn User
 func (ac *AuthController) SignInUser(ctx *gin.Context) {
-	var payload *models.AdminSignInInput
+	var payload *models.UserSignInInput
 
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 	var tokenData models.Token
-	var adminData models.Admin
+	var adminData models.User
 	var result *gorm.DB
-	var user models.Admin
+	var user models.User
 	result = ac.DB.First(&user, "username = ?", strings.ToLower(payload.Username))
 	if result.Error != nil {
-    // Handle error
-    ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Error retrieving user data"})
-    return
+		// Handle error
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Error retrieving user data"})
+		return
 	}
-
 
 	if err := utils.VerifyPassword(user.Password, payload.Password); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid Username or Password"})
@@ -99,9 +98,9 @@ func (ac *AuthController) SignInUser(ctx *gin.Context) {
 
 	adminData = user
 	tokenData = models.Token{
-  		User_ID: adminData.ID.String(),
-  		Token:   token,
-  		CreatedAt: time.Now().Unix(),
+		User_ID:   adminData.ID.String(),
+		Token:     token,
+		CreatedAt: time.Now().Unix(),
 	}
 
 	if ac.DB.Where("user_id = ?", adminData.ID) != nil {
@@ -152,33 +151,32 @@ func GetUserIDByToken(ctx *gin.Context) (response string) {
 	return useridstring
 }
 
-func (ac *AuthController) GetUserDataByToken(ctx *gin.Context) (models.Admin, error) {
-    authorizationHeader := ctx.GetHeader("Authorization")
-    if authorizationHeader == "" {
-        return models.Admin{}, errors.New("unauthorized: missing Authorization header")
-    }
+func (ac *AuthController) GetUserDataByToken(ctx *gin.Context) (models.User, error) {
+	authorizationHeader := ctx.GetHeader("Authorization")
+	if authorizationHeader == "" {
+		return models.User{}, errors.New("unauthorized: missing Authorization header")
+	}
 
-    fields := strings.Fields(authorizationHeader)
-    if len(fields) != 2 || fields[0] != "Bearer" {
-        return models.Admin{}, errors.New("unauthorized: invalid Authorization header format")
-    }
+	fields := strings.Fields(authorizationHeader)
+	if len(fields) != 2 || fields[0] != "Bearer" {
+		return models.User{}, errors.New("unauthorized: invalid Authorization header format")
+	}
 
-    config, err := initializers.LoadConfig(".")
-    if err != nil {
-        return models.Admin{}, errors.New("internal server error: failed to load config")
-    }
+	config, err := initializers.LoadConfig(".")
+	if err != nil {
+		return models.User{}, errors.New("internal server error: failed to load config")
+	}
 
-    sub, err := utils.ValidateToken(fields[1], config.TokenSecret)
-    if err != nil {
-        return models.Admin{}, errors.New("unauthorized: invalid token")
-    }
+	sub, err := utils.ValidateToken(fields[1], config.TokenSecret)
+	if err != nil {
+		return models.User{}, errors.New("unauthorized: invalid token")
+	}
 
-    userID := fmt.Sprint(sub)
-    var user models.Admin
-    if err := ac.DB.First(&user, "id = ?", userID).Error; err != nil {
-        return models.Admin{}, errors.New("user not found")
-    }
+	userID := fmt.Sprint(sub)
+	var user models.User
+	if err := ac.DB.First(&user, "id = ?", userID).Error; err != nil {
+		return models.User{}, errors.New("user not found")
+	}
 
-    return user, nil
+	return user, nil
 }
-

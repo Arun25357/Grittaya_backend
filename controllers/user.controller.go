@@ -27,7 +27,7 @@ func (uc *UserController) GetUser(ctx *gin.Context) {
 	}
 
 	// 2. Use a dedicated user model (improves data management and security)
-	user := models.Admin{
+	user := models.User{
 		ID:       userData.ID,
 		Username: userData.Username,
 		Nickname: userData.Nickname,
