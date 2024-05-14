@@ -8,6 +8,7 @@ type Stockforsale struct {
 	Amount       int       `gorm:"not null"`
 	UnitPrice    int       `gorm:"not null"`
 	Status       int
+	Type         string    `gorm:"type:varchar(55);not null"`
 	Category     string    `gorm:"type:varchar(55);not null"`
 	SetproductID uuid.UUID `gorm:"type:varchar(255);not null"`
 }
