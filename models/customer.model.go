@@ -8,5 +8,5 @@ type Customer struct {
 	Phone    string    `gorm:"type:varchar(15);not null"`
 	Email    string    `gorm:"type:varchar(55);uniqueIndex;not null"`
 	Location string    `gorm:"not null"`
-	Postcode string    `gorm:"not null"`
+	Postcode int       `gorm:"not null"`
 }
