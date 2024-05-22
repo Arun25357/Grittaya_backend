@@ -19,6 +19,6 @@ func (rc *ProductRouteController) ProductRoute(rg *gin.RouterGroup) {
 	router.GET("/GetProducts", rc.productController.GetProducts)
 	router.POST("/CreateProduct", rc.productController.CreateProduct)
 	router.GET("/GetProductByID", rc.productController.GetProductByID)
-	router.PUT("/UpdateProduct", rc.productController.UpdateProduct)
+	router.POST("/UpdateProduct", rc.productController.UpdateProduct)
 	router.DELETE("/DeleteProduct", rc.productController.DeleteProduct)
 }

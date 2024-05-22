@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/Pure227/Grittaya_backend/models"
@@ -59,23 +60,32 @@ func (pc *ProductController) GetProductByID(c *gin.Context) {
 	}
 	var product models.Product
 	if err := pc.DB.First(&product, "id = ?", id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, product)
 }
 
-func (pc *ProductController) UpdateProduct(c *gin.Context) {
+func (pc *ProductController) UpdateProduct(ctx *gin.Context) {
+
 	var product models.Product
-	var payload models.UpdateProduct
-	idStr := c.Param("id")
-	id, err := uuid.FromString(idStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
+	if err := ctx.BindUri(&product); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": err.Error()})
 		return
 	}
 
-	product := models.UpdateProduct{
+	var payload models.UpdateProduct
+	if err := ctx.ShouldBindJSON(&payload); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	updateProduct := models.UpdateProduct{
+		ID:          payload.ID,
 		Name:        payload.Name,
 		Amount:      payload.Amount,
 		UnitPrice:   payload.UnitPrice,
@@ -84,18 +94,17 @@ func (pc *ProductController) UpdateProduct(c *gin.Context) {
 		Description: payload.Description,
 	}
 
-	var product models.Product
-	if err := c.ShouldBindJSON(&product); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := pc.DB.First(&updateProduct, "ID = ?", updateProduct.ID).Error; err != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "400", "message": "Product not found"})
 		return
 	}
-	product.ID = id
 
-	if err := pc.DB.Save(&product).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	if err := pc.DB.Model(&product).Where("ID = ?", updateProduct.ID).Updates(updateProduct).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to update project"})
 		return
 	}
-	c.JSON(http.StatusOK, product)
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "200", "message": "Project updated successfully"})
 }
 
 func (pc *ProductController) DeleteProduct(c *gin.Context) {

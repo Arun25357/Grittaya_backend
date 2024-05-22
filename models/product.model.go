@@ -22,10 +22,11 @@ type CreateProduct struct {
 }
 
 type UpdateProduct struct {
-	Name        string `json:"product_name" binding:"required"`
-	Amount      int    `json:"product_amount" binding:"required"`
-	UnitPrice   int    `json:"product_unitprice" binding:"required"`
-	Type        string `json:"product_type" binding:"required"`
-	Category    string `json:"product_category" binding:"required"`
-	Description string `json:"product_description" binding:"required"`
+	ID          uuid.UUID `json:"product_id"`
+	Name        string    `json:"product_name"`
+	Amount      int       `json:"product_amount"`
+	UnitPrice   int       `json:"product_unitprice"`
+	Type        string    `json:"product_type"`
+	Category    string    `json:"product_category"`
+	Description string    `json:"product_description"`
 }
