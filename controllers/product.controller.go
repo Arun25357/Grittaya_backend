@@ -71,41 +71,38 @@ func (pc *ProductController) GetProductByID(c *gin.Context) {
 }
 
 func (pc *ProductController) UpdateProduct(ctx *gin.Context) {
-
-	var product models.Product
-	if err := ctx.BindUri(&product); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": err.Error()})
-		return
-	}
-
+	// Bind JSON payload เพื่อให้รับข้อมูลจาก request body
 	var payload models.UpdateProduct
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	updateProduct := models.UpdateProduct{
-		ID:          payload.ID,
-		Name:        payload.Name,
-		Amount:      payload.Amount,
-		UnitPrice:   payload.UnitPrice,
-		Type:        payload.Type,
-		Category:    payload.Category,
-		Description: payload.Description,
-	}
-
-	if err := pc.DB.First(&updateProduct, "ID = ?", updateProduct.ID).Error; err != nil {
-		ctx.JSON(http.StatusBadGateway, gin.H{"status": "400", "message": "Product not found"})
+	// ทำการค้นหาสินค้าที่ต้องการอัปเดตในฐานข้อมูล
+	var product models.Product
+	if err := pc.DB.First(&product, "ID = ?", payload.ID).Error; err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"status": "404", "message": "Product not found"})
 		return
 	}
 
-	if err := pc.DB.Model(&product).Where("ID = ?", updateProduct.ID).Updates(updateProduct).Error; err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to update project"})
+	// อัปเดตข้อมูลของสินค้า
+	product.Name = payload.Name
+	product.Amount = payload.Amount
+	product.UnitPrice = payload.UnitPrice
+	product.Type = payload.Type
+	product.Category = payload.Category
+	product.Description = payload.Description
+
+	// บันทึกการอัปเดตลงในฐานข้อมูล
+	if err := pc.DB.Save(&product).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to update product"})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "200", "message": "Project updated successfully"})
+	// ส่งคำตอบว่าอัปเดตสินค้าสำเร็จ
+	ctx.JSON(http.StatusOK, gin.H{"status": "200", "message": "Product updated successfully"})
 }
+
 
 func (pc *ProductController) DeleteProduct(c *gin.Context) {
 	idStr := c.Param("id")
