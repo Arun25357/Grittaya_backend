@@ -4,51 +4,58 @@ import (
 	"net/http"
 
 	"github.com/Pure227/Grittaya_backend/models"
-	"github.com/Pure227/Grittaya_backend/services"
+
 	"github.com/gin-gonic/gin"
 	uuid "github.com/satori/go.uuid"
+	"gorm.io/gorm"
 )
 
-func GetProducts(c *gin.Context) {
-	products, err := services.GetAllProducts()
-	if err != nil {
+type ProductController struct {
+	DB *gorm.DB
+}
+
+func NewProductController(db *gorm.DB) ProductController {
+	return ProductController{DB: db}
+}
+
+func (pc *ProductController) GetProducts(c *gin.Context) {
+	var products []models.Product
+	if err := pc.DB.Find(&products).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, products)
 }
 
-func CreateProduct(c *gin.Context) {
+func (pc *ProductController) CreateProduct(c *gin.Context) {
 	var product models.Product
 	if err := c.ShouldBindJSON(&product); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := services.CreateProduct(&product)
-	if err != nil {
+	if err := pc.DB.Create(&product).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusCreated, product)
 }
 
-func GetProductByID(c *gin.Context) {
+func (pc *ProductController) GetProductByID(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := uuid.FromString(idStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
 		return
 	}
-
-	product, err := services.GetProductByID(id)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+	var product models.Product
+	if err := pc.DB.First(&product, "id = ?", id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
 		return
 	}
 	c.JSON(http.StatusOK, product)
 }
 
-func UpdateProduct(c *gin.Context) {
+func (pc *ProductController) UpdateProduct(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := uuid.FromString(idStr)
 	if err != nil {
@@ -63,15 +70,14 @@ func UpdateProduct(c *gin.Context) {
 	}
 	product.ID = id
 
-	err = services.UpdateProduct(&product)
-	if err != nil {
+	if err := pc.DB.Save(&product).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, product)
 }
 
-func DeleteProduct(c *gin.Context) {
+func (pc *ProductController) DeleteProduct(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := uuid.FromString(idStr)
 	if err != nil {
@@ -79,8 +85,7 @@ func DeleteProduct(c *gin.Context) {
 		return
 	}
 
-	err = services.DeleteProduct(id)
-	if err != nil {
+	if err := pc.DB.Delete(&models.Product{}, "id = ?", id).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
