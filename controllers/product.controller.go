@@ -28,11 +28,21 @@ func (pc *ProductController) GetProducts(c *gin.Context) {
 }
 
 func (pc *ProductController) CreateProduct(c *gin.Context) {
-	var product models.Product
-	if err := c.ShouldBindJSON(&product); err != nil {
+	var payload models.CreateProduct
+	if err := c.ShouldBindJSON(&payload); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	product := models.Product{
+		Name:        payload.Name,
+		Amount:      payload.Amount,
+		UnitPrice:   payload.UnitPrice,
+		Type:        payload.Type,
+		Category:    payload.Category,
+		Description: payload.Description,
+	}
+
 	if err := pc.DB.Create(&product).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -56,11 +66,22 @@ func (pc *ProductController) GetProductByID(c *gin.Context) {
 }
 
 func (pc *ProductController) UpdateProduct(c *gin.Context) {
+	var product models.Product
+	var payload models.UpdateProduct
 	idStr := c.Param("id")
 	id, err := uuid.FromString(idStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
 		return
+	}
+
+	product := models.UpdateProduct{
+		Name:        payload.Name,
+		Amount:      payload.Amount,
+		UnitPrice:   payload.UnitPrice,
+		Type:        payload.Type,
+		Category:    payload.Category,
+		Description: payload.Description,
 	}
 
 	var product models.Product

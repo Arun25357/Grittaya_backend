@@ -9,15 +9,23 @@ type Product struct {
 	UnitPrice   int       `gorm:"not null"`
 	Type        string    `gorm:"type:varchar(15);not null"`
 	Category    string    `gorm:"type:varchar(15);not null"`
-	Description string    `gorm:"type:varchar(15);not null"`
+	Description string    `gorm:"type:varchar(255);not null"`
 }
 
-type NewProduct struct {
-	ID          uuid.UUID `jorm:"id"`
-	Name        string    `jorm:"product_name"`
-	Amount      int       `jorm:"product_amount"`
-	UnitPrice   int       `jorm:"product_unitprice"`
-	Type        string    `jorm:"product_type"`
-	Category    string    `jorm:"product_category"`
-	Description string    `jorm:"product_description"`
+type CreateProduct struct {
+	Name        string `json:"product_name" binding:"required"`
+	Amount      int    `json:"product_amount" binding:"required"`
+	UnitPrice   int    `json:"product_unitprice" binding:"required"`
+	Type        string `json:"product_type" binding:"required"`
+	Category    string `json:"product_category" binding:"required"`
+	Description string `json:"product_description" binding:"required"`
+}
+
+type UpdateProduct struct {
+	Name        string `json:"product_name" binding:"required"`
+	Amount      int    `json:"product_amount" binding:"required"`
+	UnitPrice   int    `json:"product_unitprice" binding:"required"`
+	Type        string `json:"product_type" binding:"required"`
+	Category    string `json:"product_category" binding:"required"`
+	Description string `json:"product_description" binding:"required"`
 }
