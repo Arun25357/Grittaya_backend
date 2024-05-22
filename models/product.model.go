@@ -12,30 +12,12 @@ type Product struct {
 	Description string    `gorm:"type:varchar(15);not null"`
 }
 
-type CreateProduct struct {
-	ID          uuid.UUID
-	Name        string `jorm:"type:varchar(55);not null"`
-	Amount      int    `jorm:"not null"`
-	UnitPrice   int    `jorm:"not null"`
-	Type        string `jorm:"type:varchar(15);not null"`
-	Category    string `jorm:"type:varchar(15);not null"`
-	Description string `jorm:"type:varchar(15);not null"`
-}
-
-type UpdateProduct struct {
-	Name        string `jorm:"type:varchar(55);not null"`
-	Amount      int    `jorm:"not null"`
-	UnitPrice   int    `jorm:"not null"`
-	Category    string `jorm:"type:varchar(15);not null"`
-	Description string `jorm:"type:varchar(15);not null"`
-}
-
-type DeleteProduct struct {
-	ID          uuid.UUID
-	Name        string `jorm:"type:varchar(55);not null"`
-	Amount      int    `jorm:"not null"`
-	UnitPrice   int    `jorm:"not null"`
-	Type        string `jorm:"type:varchar(15);not null"`
-	Category    string `jorm:"type:varchar(15);not null"`
-	Description string `jorm:"type:varchar(15);not null"`
+type NewProduct struct {
+	ID          uuid.UUID `jorm:"id"`
+	Name        string    `jorm:"product_name"`
+	Amount      int       `jorm:"product_amount"`
+	UnitPrice   int       `jorm:"product_unitprice"`
+	Type        string    `jorm:"product_type"`
+	Category    string    `jorm:"product_category"`
+	Description string    `jorm:"product_description"`
 }
