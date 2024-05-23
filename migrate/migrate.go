@@ -21,7 +21,6 @@ func main() {
 	initializers.DB.AutoMigrate(&models.Customer{})
 	initializers.DB.AutoMigrate(&models.User{})
 	initializers.DB.AutoMigrate(&models.Order{})
-	initializers.DB.AutoMigrate(&models.Detailorder{})
 	initializers.DB.AutoMigrate(&models.Product{})
 	initializers.DB.AutoMigrate(&models.SetProduct{})
 	initializers.DB.AutoMigrate(&models.Discount{})
