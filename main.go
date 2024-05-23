@@ -21,12 +21,14 @@ var (
 	ProductRouteController    routes.ProductRouteController
 	SetProductController      controllers.SetProductController
 	SetProductRouteController routes.SetProductRouteController
+	DiscountController        controllers.DiscountController
+	DiscountRouteController   routes.DiscountRouteController
 )
 
 func init() {
 	config, err := initializers.LoadConfig(".")
 	if err != nil {
-		log.Fatal("? Could not load environment variables", err)
+		log.Fatal("Could not load environment variables", err)
 	}
 
 	initializers.ConnectDB(&config)
@@ -35,7 +37,7 @@ func init() {
 	AuthRouteController = routes.NewAuthRouteController(AuthController)
 
 	UserController = controllers.NewUserController(initializers.DB)
-	UserRouteController = routes.NewRouteUserController(UserController)
+	UserRouteController = routes.UserRouteController(UserRouteController)
 
 	ProductController = controllers.NewProductController(initializers.DB)
 	ProductRouteController = routes.NewProductRouteController(ProductController)
@@ -43,13 +45,16 @@ func init() {
 	SetProductController = *controllers.NewSetProductController(initializers.DB)
 	SetProductRouteController = routes.NewSetProductRouteController(SetProductController)
 
+	DiscountController = controllers.NewDiscountController(initializers.DB)
+	DiscountRouteController = routes.NewDiscountRouteController(DiscountController)
+
 	server = gin.Default()
 }
 
 func main() {
 	config, err := initializers.LoadConfig(".")
 	if err != nil {
-		log.Fatal("? Could not load environment variables", err)
+		log.Fatal("Could not load environment variables", err)
 	}
 
 	corsConfig := cors.DefaultConfig()
@@ -69,6 +74,7 @@ func main() {
 	UserRouteController.UserRoute(router)
 	ProductRouteController.ProductRoute(router)
 	SetProductRouteController.SetProductRoutes(router)
+	DiscountRouteController.DiscountRoutes(router) // Add discount routes
 
 	log.Fatal(server.Run(":" + config.BackendPort))
 }
