@@ -21,8 +21,6 @@ var (
 	ProductRouteController    routes.ProductRouteController
 	SetProductController      controllers.SetProductController
 	SetProductRouteController routes.SetProductRouteController
-	DiscountController        controllers.DiscountController
-	DiscountRouteController   routes.DiscountRouteController
 )
 
 func init() {
@@ -44,9 +42,6 @@ func init() {
 
 	SetProductController = *controllers.NewSetProductController(initializers.DB)
 	SetProductRouteController = routes.NewSetProductRouteController(SetProductController)
-
-	DiscountController = controllers.NewDiscountController(initializers.DB)
-	DiscountRouteController = routes.NewDiscountRouteController(DiscountController)
 
 	server = gin.Default()
 }
@@ -74,7 +69,6 @@ func main() {
 	UserRouteController.UserRoute(router)
 	ProductRouteController.ProductRoute(router)
 	SetProductRouteController.SetProductRoutes(router)
-	DiscountRouteController.DiscountRoutes(router) // Add discount routes
 
 	log.Fatal(server.Run(":" + config.BackendPort))
 }
