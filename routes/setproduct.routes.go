@@ -15,9 +15,9 @@ func NewSetProductRouteController(setProductController controllers.SetProductCon
 
 func (rc *SetProductRouteController) SetProductRoutes(rg *gin.RouterGroup) {
 	router := rg.Group("/setproducts")
-	router.POST("/", rc.setProductController.CreateSetProduct)
-	router.PUT("/:id", rc.setProductController.UpdateSetProduct)
-	router.DELETE("/:id", rc.setProductController.DeleteSetProduct)
-	router.GET("/:id", rc.setProductController.GetSetProduct)
-	router.GET("/", rc.setProductController.GetAllSetProducts)
+	router.POST("/CreateSetProduct", rc.setProductController.CreateSetProduct)
+	router.POST("/UpdateSetProduct", rc.setProductController.UpdateSetProduct)
+	router.DELETE("/DeleteSetProduct", rc.setProductController.DeleteSetProduct)
+	router.GET("/GetSetProduct", rc.setProductController.GetSetProduct)
+	router.GET("/GetAllSetProducts", rc.setProductController.GetAllSetProducts)
 }

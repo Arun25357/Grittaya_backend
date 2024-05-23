@@ -12,17 +12,17 @@ type Setproduct struct {
 }
 
 type SetProduct struct {
-	ID          uuid.UUID       `gorm:"type:uuid;default:uuid_generate_v4();primary_key"`
-	Name        string          `gorm:"type:varchar(255);not null"`
-	Description string          `gorm:"type:varchar(255);not null"`
+	ID          uuid.UUID        `gorm:"type:uuid;default:uuid_generate_v4();primary_key"`
+	Name        string           `gorm:"type:varchar(255);not null"`
+	Description string           `gorm:"type:varchar(255);not null"`
 	Items       []SetProductItem `gorm:"foreignKey:SetProductID"`
 }
 
 // Model to associate products with sets
 type SetProductItem struct {
-	ID          uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primary_key"`
+	ID           uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primary_key"`
 	SetProductID uuid.UUID `gorm:"type:uuid;not null"`
 	ProductID    uuid.UUID `gorm:"type:uuid;not null"`
-	Product     Product   `gorm:"foreignKey:ProductID"`
-	Quantity    int       `gorm:"not null"`
+	Product      Product   `gorm:"foreignKey:ProductID"`
+	Quantity     int       `gorm:"not null"`
 }

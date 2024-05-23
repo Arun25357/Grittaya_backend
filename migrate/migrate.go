@@ -23,7 +23,7 @@ func main() {
 	initializers.DB.AutoMigrate(&models.Order{})
 	initializers.DB.AutoMigrate(&models.Detailorder{})
 	initializers.DB.AutoMigrate(&models.Product{})
-	initializers.DB.AutoMigrate(&models.Setproduct{})
+	initializers.DB.AutoMigrate(&models.SetProduct{})
 	initializers.DB.AutoMigrate(&models.Discount{})
 	initializers.DB.AutoMigrate(&models.Token{})
 	fmt.Println("? Migration complete")
