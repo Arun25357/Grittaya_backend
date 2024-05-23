@@ -12,13 +12,15 @@ import (
 )
 
 var (
-	server                 *gin.Engine
-	AuthController         controllers.AuthController
-	AuthRouteController    routes.AuthRouteController
-	UserController         controllers.UserController
-	UserRouteController    routes.UserRouteController
-	ProductController      controllers.ProductController
-	ProductRouteController routes.ProductRouteController
+	server                    *gin.Engine
+	AuthController            controllers.AuthController
+	AuthRouteController       routes.AuthRouteController
+	UserController            controllers.UserController
+	UserRouteController       routes.UserRouteController
+	ProductController         controllers.ProductController
+	ProductRouteController    routes.ProductRouteController
+	SetProductController      controllers.SetProductController
+	SetProductRouteController routes.SetProductRouteController
 )
 
 func init() {
@@ -37,6 +39,9 @@ func init() {
 
 	ProductController = controllers.NewProductController(initializers.DB)
 	ProductRouteController = routes.NewProductRouteController(ProductController)
+
+	SetProductController = *controllers.NewSetProductController(initializers.DB)
+	SetProductRouteController = routes.NewSetProductRouteController(SetProductController)
 
 	server = gin.Default()
 }
@@ -62,7 +67,8 @@ func main() {
 
 	AuthRouteController.AuthRoute(router)
 	UserRouteController.UserRoute(router)
-	ProductRouteController.ProductRoute(router) // เพิ่มเส้นทางสำหรับสินค้า
+	ProductRouteController.ProductRoute(router)
+	SetProductRouteController.SetProductRoutes(router)
 
 	log.Fatal(server.Run(":" + config.BackendPort))
 }
