@@ -14,5 +14,8 @@ type Order struct {
 	Platform         string    `gorm:"type:varchar(255);not null"`
 	DeliveryType     string    `gorm:"type:varchar(255);not null"`
 	TotalPrice       int       `gorm:"type:int;not null"`
-	UserID          uuid.UUID `gorm:"type:varchar(255);not null"`
+	Discount         string    `gorm:"type:varchar(55);uniqueIndex;not null"`
+	SetproductID     uuid.UUID `gorm:"type:varchar(255);not null"`
+	CustomerID       uuid.UUID `gorm:"type:varchar(255);not null"`
+	UserID           uuid.UUID `gorm:"type:varchar(255);not null"`
 }
