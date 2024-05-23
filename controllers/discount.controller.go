@@ -6,8 +6,8 @@ import (
 
 	"github.com/Pure227/Grittaya_backend/models"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	uuid "github.com/satori/go.uuid"
+	"gorm.io/gorm"
 )
 
 type DiscountController struct {
