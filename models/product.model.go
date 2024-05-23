@@ -43,9 +43,6 @@ type GetProduct struct {
 	Description string    `json:"product_description"`
 }
 
-type GetProductByID struct {
-	ID uuid.UUID `json:"product_id"`
-}
 
 type DeleteProduct struct {
 	ID uuid.UUID `json:"product_id"`

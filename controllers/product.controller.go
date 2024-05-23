@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -9,7 +8,6 @@ import (
 	"github.com/Pure227/Grittaya_backend/models"
 
 	"github.com/gin-gonic/gin"
-	uuid "github.com/satori/go.uuid"
 	"gorm.io/gorm"
 )
 
@@ -132,25 +130,6 @@ func (pc *ProductController) CreateProduct(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusCreated, product)
-}
-
-func (pc *ProductController) GetProductByID(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := uuid.FromString(idStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
-		return
-	}
-	var product models.Product
-	if err := pc.DB.First(&product, "id = ?", id).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
-			return
-		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, product)
 }
 
 func (pc *ProductController) UpdateProduct(ctx *gin.Context) {

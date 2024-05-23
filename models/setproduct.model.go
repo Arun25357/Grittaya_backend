@@ -8,5 +8,5 @@ type Setproduct struct {
 	Amount    int       `gorm:"not null"`
 	UnitPrice int       `gorm:"not null"`
 	ProductID uuid.UUID `gorm:"type:varchar(255);not null"`
-	Status    int
+	Status    int       `gorm:"not null"`
 }
