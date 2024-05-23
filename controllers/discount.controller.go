@@ -6,8 +6,8 @@ import (
 
 	"github.com/Pure227/Grittaya_backend/models"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	uuid "github.com/satori/go.uuid"
+	"gorm.io/gorm"
 )
 
 type DiscountController struct {
@@ -21,6 +21,7 @@ func NewDiscountController(DB *gorm.DB) DiscountController {
 func (dc *DiscountController) CreateDiscount(ctx *gin.Context) {
 	var payload struct {
 		Percent int       `json:"percent" binding:"required"`
+		Baht    int       `json:"bagt" binding:"required"`
 		Expir   time.Time `json:"expir" binding:"required"`
 	}
 
@@ -31,8 +32,8 @@ func (dc *DiscountController) CreateDiscount(ctx *gin.Context) {
 
 	discount := models.Discount{
 		ID:      uuid.NewV4(),
+		Baht:    payload.Baht,
 		Percent: payload.Percent,
-		Expir:   payload.Expir,
 	}
 
 	if err := dc.DB.Create(&discount).Error; err != nil {
@@ -55,8 +56,8 @@ func (dc *DiscountController) GetDiscounts(ctx *gin.Context) {
 func (dc *DiscountController) UpdateDiscount(ctx *gin.Context) {
 	var payload struct {
 		ID      uuid.UUID `json:"id" binding:"required"`
+		Baht    int       `json:"baht"`
 		Percent int       `json:"percent"`
-		Expir   time.Time `json:"expir"`
 	}
 
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
@@ -71,7 +72,7 @@ func (dc *DiscountController) UpdateDiscount(ctx *gin.Context) {
 	}
 
 	discount.Percent = payload.Percent
-	discount.Expir = payload.Expir
+	discount.Baht = payload.Baht
 
 	if err := dc.DB.Save(&discount).Error; err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to update discount"})
