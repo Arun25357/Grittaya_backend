@@ -12,15 +12,15 @@ import (
 )
 
 var (
-	server                    *gin.Engine
-	AuthController            controllers.AuthController
-	AuthRouteController       routes.AuthRouteController
-	UserController            controllers.UserController
-	UserRouteController       routes.UserRouteController
-	ProductController         controllers.ProductController
-	ProductRouteController    routes.ProductRouteController
-	SetProductController      controllers.SetProductController
-	SetProductRouteController routes.SetProductRouteController
+	server                  *gin.Engine
+	AuthController          controllers.AuthController
+	AuthRouteController     routes.AuthRouteController
+	UserController          controllers.UserController
+	UserRouteController     routes.UserRouteController
+	ProductController       controllers.ProductController
+	ProductRouteController  routes.ProductRouteController
+	CustomerController      controllers.CustomerController
+	CustomerRouteController routes.CustomerRouteController
 )
 
 func init() {
@@ -40,8 +40,8 @@ func init() {
 	ProductController = controllers.NewProductController(initializers.DB)
 	ProductRouteController = routes.NewProductRouteController(ProductController)
 
-	SetProductController = *controllers.NewSetProductController(initializers.DB)
-	SetProductRouteController = routes.NewSetProductRouteController(SetProductController)
+	CustomerController = controllers.NewCustomerController(initializers.DB)
+	CustomerRouteController = routes.NewCustomerRouteController(CustomerController)
 
 	server = gin.Default()
 }
@@ -67,8 +67,8 @@ func main() {
 
 	AuthRouteController.AuthRoute(router)
 	UserRouteController.UserRoute(router)
-	ProductRouteController.ProductRoute(router)
-	SetProductRouteController.SetProductRoutes(router)
+	ProductRouteController.ProductRoute(router)   // เพิ่มเส้นทางสำหรับสินค้า
+	CustomerRouteController.CustomerRoute(router) // เพิ่มเส้นทางสำหรับลูกค้า // เพิ่มเส้นทางสำหรับลูกค้า
 
 	log.Fatal(server.Run(":" + config.BackendPort))
 }
