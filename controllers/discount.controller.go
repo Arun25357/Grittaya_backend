@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/Pure227/Grittaya_backend/models"
 	"github.com/gin-gonic/gin"
@@ -20,9 +19,8 @@ func NewDiscountController(DB *gorm.DB) DiscountController {
 
 func (dc *DiscountController) CreateDiscount(ctx *gin.Context) {
 	var payload struct {
-		Percent int       `json:"percent" binding:"required"`
-		Baht    int       `json:"bagt" binding:"required"`
-		Expir   time.Time `json:"expir" binding:"required"`
+		Percent int `json:"percent" binding:"required"`
+		Baht    int `json:"bagt" binding:"required"`
 	}
 
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
