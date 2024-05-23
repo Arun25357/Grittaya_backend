@@ -33,6 +33,20 @@ type UpdateProduct struct {
 	Description string    `json:"product_description"`
 }
 
+type GetProduct struct {
+	ID          uuid.UUID `json:"product_id"`
+	Name        string    `json:"product_name"`
+	Amount      int       `json:"product_amount"`
+	UnitPrice   float64   `json:"product_unitprice"`
+	Type        string    `json:"product_type"`
+	Category    string    `json:"product_category"`
+	Description string    `json:"product_description"`
+}
+
+type GetProductByID struct {
+	ID uuid.UUID `json:"product_id"`
+}
+
 type DeleteProduct struct {
 	ID uuid.UUID `json:"product_id"`
 }
