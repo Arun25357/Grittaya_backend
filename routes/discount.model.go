@@ -18,6 +18,6 @@ func (rc *DiscountRouteController) DiscountRoutes(rg *gin.RouterGroup) {
 
 	router.POST("/create", rc.discountController.CreateDiscount)
 	router.GET("/get", rc.discountController.GetDiscounts)
-	router.PUT("/update", rc.discountController.UpdateDiscount)
+	router.POST("/update", rc.discountController.UpdateDiscount)
 	router.DELETE("/delete", rc.discountController.DeleteDiscount)
 }
