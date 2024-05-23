@@ -72,49 +72,59 @@ func (pc *ProductController) GetProductByID(c *gin.Context) {
 
 func (pc *ProductController) UpdateProduct(ctx *gin.Context) {
 	// Bind JSON payload เพื่อให้รับข้อมูลจาก request body
-	var payload models.UpdateProduct
-	if err := ctx.ShouldBindJSON(&payload); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	var product models.Product
+	if err := ctx.BindUri(&product); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": err.Error()})
 		return
 	}
 
 	// ทำการค้นหาสินค้าที่ต้องการอัปเดตในฐานข้อมูล
-	var product models.Product
-	if err := pc.DB.First(&product, "ID = ?", payload.ID).Error; err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"status": "404", "message": "Product not found"})
+	var payload models.UpdateProduct
+	if err := ctx.ShouldBindJSON(&payload); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": err.Error()})
 		return
 	}
 
 	// อัปเดตข้อมูลของสินค้า
-	product.Name = payload.Name
-	product.Amount = payload.Amount
-	product.UnitPrice = payload.UnitPrice
-	product.Type = payload.Type
-	product.Category = payload.Category
-	product.Description = payload.Description
+	updateproduct := models.UpdateProduct{
+		ID:          payload.ID,
+		Name:        payload.Name,
+		Amount:      payload.Amount,
+		UnitPrice:   payload.UnitPrice,
+		Type:        payload.Type,
+		Category:    payload.Category,
+		Description: payload.Description,
+	}
 
-	// บันทึกการอัปเดตลงในฐานข้อมูล
+	if err := pc.DB.First(&product, "ID = ?", updateproduct.ID).Error; err != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "400", "message": "Product not found"})
+		return
+	}
+
 	if err := pc.DB.Save(&product).Error; err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to update product"})
 		return
 	}
 
-	// ส่งคำตอบว่าอัปเดตสินค้าสำเร็จ
 	ctx.JSON(http.StatusOK, gin.H{"status": "200", "message": "Product updated successfully"})
 }
 
-
-func (pc *ProductController) DeleteProduct(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := uuid.FromString(idStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
+func (pc *ProductController) DeleteProduct(ctx *gin.Context) {
+	var product models.Product
+	var payload *models.DeleteProduct
+	if err := ctx.ShouldBindJSON(&payload); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": err.Error()})
 		return
 	}
 
-	if err := pc.DB.Delete(&models.Product{}, "id = ?", id).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	deleteProduct := models.Product{
+		ID: payload.ID,
+	}
+
+	if err := pc.DB.First(&product, "ID = ?", deleteProduct.ID).Delete(&product).Error; err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": "Product not found"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Product deleted"})
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "200", "message": "Product deleted successfully"})
 }
