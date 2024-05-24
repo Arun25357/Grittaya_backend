@@ -63,6 +63,7 @@ func (pc *ProductController) GetAllProduct(ctx *gin.Context) {
 			Type:        payload.Type,
 			Category:    payload.Category,
 			Description: payload.Description,
+			AttachFile:  payload.AttachFile,
 		}
 		getProducts = append(getProducts, getProduct)
 	}
@@ -103,6 +104,7 @@ func (pc *ProductController) GetProducts(ctx *gin.Context) {
 		Type:        product.Type,
 		Category:    product.Category,
 		Description: product.Description,
+		AttachFile:  product.AttachFile,
 	}
 
 	// Return the ticket
@@ -117,12 +119,12 @@ func (pc *ProductController) CreateProduct(c *gin.Context) {
 	}
 
 	product := models.Product{
-		Name:        payload.Name,
-		Amount:      payload.Amount,
-		UnitPrice:   payload.UnitPrice,
-		Type:        payload.Type,
-		Category:    payload.Category,
-		Description: payload.Description,
+		Name:       payload.Name,
+		Amount:     payload.Amount,
+		UnitPrice:  payload.UnitPrice,
+		Type:       payload.Type,
+		Category:   payload.Category,
+		AttachFile: payload.AttachFile,
 	}
 
 	if err := pc.DB.Create(&product).Error; err != nil {
@@ -156,6 +158,7 @@ func (pc *ProductController) UpdateProduct(ctx *gin.Context) {
 		Type:        payload.Type,
 		Category:    payload.Category,
 		Description: payload.Description,
+		AttachFile:  payload.AttachFile,
 	}
 
 	if err := pc.DB.First(&product, "ID = ?", updateproduct.ID).Error; err != nil {

@@ -12,15 +12,16 @@ type Product struct {
 	Type        string    `gorm:"type:varchar(55);not null"`
 	Category    string    `gorm:"type:varchar(255);not null"`
 	Description string    `gorm:"type:varchar(255);not null"`
+	AttachFile  string
 }
 
 type CreateProduct struct {
-	Name        string  `json:"product_name" binding:"required"`
-	Amount      int     `json:"product_amount" binding:"required"`
-	UnitPrice   float64 `json:"product_unitprice" binding:"required"`
-	Type        string  `json:"product_type" binding:"required"`
-	Category    string  `json:"product_category" binding:"required"`
-	Description string  `json:"product_description" binding:"required"`
+	Name       string  `json:"product_name" binding:"required"`
+	Amount     int     `json:"product_amount" binding:"required"`
+	UnitPrice  float64 `json:"product_unitprice" binding:"required"`
+	Type       string  `json:"product_type" binding:"required"`
+	Category   string  `json:"product_category" binding:"required"`
+	AttachFile string  `json:"attach_file"`
 }
 
 type UpdateProduct struct {
@@ -31,6 +32,7 @@ type UpdateProduct struct {
 	Type        string    `json:"product_type"`
 	Category    string    `json:"product_category"`
 	Description string    `json:"product_description"`
+	AttachFile  string    `json:"attach_file"`
 }
 
 type GetProduct struct {
@@ -41,8 +43,8 @@ type GetProduct struct {
 	Type        string    `json:"product_type"`
 	Category    string    `json:"product_category"`
 	Description string    `json:"product_description"`
+	AttachFile  string    `json:"attach_file"`
 }
-
 
 type DeleteProduct struct {
 	ID uuid.UUID `json:"product_id"`
