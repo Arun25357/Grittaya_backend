@@ -12,14 +12,16 @@ type Product struct {
 	Type        string    `gorm:"type:varchar(55);not null"`
 	Category    string    `gorm:"type:varchar(255);not null"`
 	Description string    `gorm:"type:varchar(255);not null"`
+	AttachFile  string
 }
 
 type CreateProduct struct {
-	Name       string  `json:"product_name" binding:"required"`
-	Amount     int     `json:"product_amount" binding:"required"`
-	Price      float64 `json:"product_price" binding:"required"`
-	Type       string  `json:"product_type" binding:"required"`
-	Category   string  `json:"product_category" binding:"required"`
+	Name       string  `json:"product_name"`
+	Amount     int     `json:"product_amount"`
+	Price      float64 `json:"product_Price"`
+	Type       string  `json:"product_type"`
+	Category   string  `json:"product_category"`
+	AttachFile string  `json:"attach_file"`
 }
 
 type UpdateProduct struct {
@@ -30,6 +32,7 @@ type UpdateProduct struct {
 	Type        string    `json:"product_type"`
 	Category    string    `json:"product_category"`
 	Description string    `json:"product_description"`
+	AttachFile  string    `json:"attach_file"`
 }
 
 type GetProduct struct {
@@ -40,6 +43,7 @@ type GetProduct struct {
 	Type        string    `json:"product_type"`
 	Category    string    `json:"product_category"`
 	Description string    `json:"product_description"`
+	AttachFile  string    `json:"attach_file"`
 }
 
 type DeleteProduct struct {

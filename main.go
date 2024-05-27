@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"path/filepath"
 
 	"github.com/Pure227/Grittaya_backend/controllers"
 	"github.com/Pure227/Grittaya_backend/initializers"
@@ -70,6 +71,9 @@ func main() {
 		ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
 	})
 
+	productimagePath := "./public/product"
+	absoluteproductImagePath, _ := filepath.Abs(productimagePath)
+	server.Static("/public/product", absoluteproductImagePath)
 
 	AuthRouteController.AuthRoute(router)
 	UserRouteController.UserRoute(router)

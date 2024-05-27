@@ -1,10 +1,15 @@
 package controllers
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/Pure227/Grittaya_backend/models"
 
@@ -64,6 +69,7 @@ func (pc *ProductController) GetAllProduct(ctx *gin.Context) {
 			Type:        payload.Type,
 			Category:    payload.Category,
 			Description: payload.Description,
+			AttachFile:  payload.AttachFile,
 		}
 		getProducts = append(getProducts, getProduct)
 	}
@@ -118,25 +124,87 @@ func (pc *ProductController) CreateProduct(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	
+	// Retrieve form data
+	file, err := ctx.FormFile("attach_file")
+	log.Print(file)
+	// Check if file was uploaded
+	var attachFile string
+	if err != nil {
+		if err != http.ErrMissingFile {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to upload file"})
+			return
+		}
+		// No file uploaded
+		attachFile = ""
+	} else {
+		// Process file data
+		ext := filepath.Ext(file.Filename)
+		originalFileName := strings.TrimSuffix(filepath.Base(file.Filename), filepath.Ext(file.Filename))
+		path := "public/product"
+
+		// Check if the file extension is valid
+		validExtensions := []string{".jpg", ".jpeg", ".png", ".gif"}
+		validExtension := false
+		for _, validExt := range validExtensions {
+			if strings.EqualFold(ext, validExt) {
+				validExtension = true
+				break
+			}
+		}
+
+		if !validExtension {
+			ctx.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": "Invalid file extension"})
+			return
+		}
+
+		if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
+			err := os.Mkdir(path, os.ModePerm)
+			if err != nil {
+				log.Println(err)
+				ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to create directory"})
+				return
+			}
+		}
+
+		if err := os.MkdirAll(path, os.ModePerm); err != nil {
+			log.Println(err)
+			ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to create directory"})
+			return
+		}
+
+		pathWithTime := path + "/" + strconv.FormatInt(time.Now().Unix(), 10) + "_" + originalFileName + ext
+		attachFile = pathWithTime
+
+		// Save the uploaded file
+		if err := ctx.SaveUploadedFile(file, pathWithTime); err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to save file"})
+			return
+		}
+	}
 	product := models.Product{
-		Name:     payload.Name,
-		Amount:   payload.Amount,
-		Price:    payload.Price,
-		Type:     payload.Type,
-		Category: payload.Category,
+		Name:       payload.Name,
+		Amount:     payload.Amount,
+		Price:      payload.Price,
+		Type:       payload.Type,
+		Category:   payload.Category,
+		AttachFile: attachFile,
+	}
+	if err := ctx.ShouldBindJSON(&payload); err != nil {
+		log.Println("Error binding JSON:", err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	if err := pc.DB.Create(&product).Error; err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "400", "message": "Can't create new ticket"})
 		return
 	}
-
-	if err := pc.DB.Save(product).Error; err != nil {
+	
+	if err := pc.DB.Save(&product).Error; err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to save ticket"})
 		return
 	}
-
+	
 	ctx.JSON(http.StatusCreated, gin.H{"status": "201", "data": product})
 }
 
@@ -164,6 +232,7 @@ func (pc *ProductController) UpdateProduct(ctx *gin.Context) {
 		Type:        payload.Type,
 		Category:    payload.Category,
 		Description: payload.Description,
+		AttachFile:  payload.AttachFile,
 	}
 
 	if err := pc.DB.First(&product, "ID = ?", updateproduct.ID).Error; err != nil {
