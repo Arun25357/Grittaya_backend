@@ -47,6 +47,8 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 		Username: payload.Username,
 		Password: hashedPassword,
 		Position: int(constants.Admin),
+		Nickname: payload.Nickname,
+		Phone:    payload.Phone,
 	}
 
 	result := ac.DB.Create(&newUser)
@@ -179,4 +181,24 @@ func (ac *AuthController) GetUserDataByToken(ctx *gin.Context) (models.User, err
 	}
 
 	return user, nil
+}
+
+func (pc *AuthController) DeleteUser(ctx *gin.Context) {
+	var user models.User
+	var payload *models.UserDelete
+	if err := ctx.ShouldBindJSON(&payload); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": err.Error()})
+		return
+	}
+
+	deleteuser := models.User{
+		ID: payload.ID,
+	}
+
+	if err := pc.DB.First(&user, "ID = ?", deleteuser.ID).Delete(&user).Error; err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": "Product not found"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "200", "message": "Product deleted successfully"})
 }

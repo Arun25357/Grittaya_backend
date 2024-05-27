@@ -18,7 +18,7 @@ func NewUserController(DB *gorm.DB) UserController {
 
 func (uc *UserController) GetUser(ctx *gin.Context) {
 	ac := NewAuthController(uc.DB)
-	
+
 	userData, err := ac.GetUserDataByToken(ctx)
 	if err != nil {
 		// Handle error appropriately (e.g., return unauthorized or bad request)
@@ -32,9 +32,9 @@ func (uc *UserController) GetUser(ctx *gin.Context) {
 		Username: userData.Username,
 		Nickname: userData.Nickname,
 		Position: userData.Position,
-		
 	}
 
-	
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": user}})
 }
+
+
