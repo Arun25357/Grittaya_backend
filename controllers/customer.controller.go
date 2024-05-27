@@ -56,3 +56,4 @@ func (cc *CustomerController) CreateCustomer(ctx *gin.Context) {
 		"postcode": newCustomer.Postcode,
 	})
 }
+

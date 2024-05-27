@@ -16,3 +16,5 @@ type CustomerDetails struct {
 	Location string `json:"location"`
 	Postcode int    `json:"postcode"`
 }
+
+

@@ -37,3 +37,7 @@ type ResetUserPasswordInput struct {
 	Password        string `gorm:"password" binding:"required,min=8"`
 	PasswordConfirm string `gorm:"passwordConfirm" binding:"required"`
 }
+
+type Userlogout struct {
+	
+}

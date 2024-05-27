@@ -1,15 +1,10 @@
 package controllers
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strconv"
-	"strings"
-	"time"
 
 	"github.com/Pure227/Grittaya_backend/models"
 
@@ -69,7 +64,6 @@ func (pc *ProductController) GetAllProduct(ctx *gin.Context) {
 			Type:        payload.Type,
 			Category:    payload.Category,
 			Description: payload.Description,
-			AttachFile:  payload.AttachFile,
 		}
 		getProducts = append(getProducts, getProduct)
 	}
@@ -110,7 +104,6 @@ func (pc *ProductController) GetProducts(ctx *gin.Context) {
 		Type:        product.Type,
 		Category:    product.Category,
 		Description: product.Description,
-		AttachFile:  product.AttachFile,
 	}
 
 	// Return the ticket
@@ -119,76 +112,22 @@ func (pc *ProductController) GetProducts(ctx *gin.Context) {
 
 func (pc *ProductController) CreateProduct(ctx *gin.Context) {
 	var payload models.CreateProduct
+
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
 		log.Println("Error binding JSON:", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
 	
-	file, err := ctx.FormFile("attach_file")
-
-	// Check if file was uploaded
-	var AttachFile string
-	if err != nil {
-		if err != http.ErrMissingFile {
-			log.Println("File upload error:", err)
-			ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to upload file"})
-			return
-		}
-		// No file uploaded
-		AttachFile = ""
-	} else {
-		// Process file data
-		ext := filepath.Ext(file.Filename)
-		originalFileName := strings.TrimSuffix(filepath.Base(file.Filename), filepath.Ext(file.Filename))
-		path := "public/product"
-
-		// Check if the file extension is valid
-		validExtensions := []string{".jpg", ".jpeg", ".png", ".gif"}
-		validExtension := false
-		for _, validExt := range validExtensions {
-			if strings.EqualFold(ext, validExt) {
-				validExtension = true
-				break
-			}
-		}
-
-		if !validExtension {
-			log.Println("Invalid file extension:", ext)
-			ctx.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": "Invalid file extension"})
-			return
-		}
-
-		if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
-			if err := os.MkdirAll(path, os.ModePerm); err != nil {
-				log.Println("Failed to create directory:", err)
-				ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to create directory"})
-				return
-			}
-		}
-
-		pathWithTime := filepath.Join(path, strconv.FormatInt(time.Now().Unix(), 10)+"-"+originalFileName+ext)
-		AttachFile = pathWithTime
-
-		// Save the uploaded file
-		if err := ctx.SaveUploadedFile(file, pathWithTime); err != nil {
-			log.Println("Failed to save file:", err)
-			ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to save file"})
-			return
-		}
-	}
-
 	product := models.Product{
-		Name:       payload.Name,
-		Amount:     payload.Amount,
-		Price:      payload.Price,
-		Type:       payload.Type,
-		Category:   payload.Category,
-		AttachFile: AttachFile,
+		Name:     payload.Name,
+		Amount:   payload.Amount,
+		Price:    payload.Price,
+		Type:     payload.Type,
+		Category: payload.Category,
 	}
 
-	if err :=pc.DB.Create(&product).Error; err != nil {
+	if err := pc.DB.Create(&product).Error; err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "400", "message": "Can't create new ticket"})
 		return
 	}
@@ -225,7 +164,6 @@ func (pc *ProductController) UpdateProduct(ctx *gin.Context) {
 		Type:        payload.Type,
 		Category:    payload.Category,
 		Description: payload.Description,
-		AttachFile:  payload.AttachFile,
 	}
 
 	if err := pc.DB.First(&product, "ID = ?", updateproduct.ID).Error; err != nil {
