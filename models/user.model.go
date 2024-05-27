@@ -15,6 +15,8 @@ type UserSignUpInput struct {
 	Username        string `json:"username" binding:"required"`
 	Password        string `json:"password" binding:"required"`
 	ConfirmPassword string `json:"confirmPassword" binding:"required"`
+	Nickname        string `json:"nickname" binding:"required"`
+	Phone           string `jorm:"phone" binding:"required"`
 }
 
 type UserSignInInput struct {
@@ -38,6 +40,6 @@ type ResetUserPasswordInput struct {
 	PasswordConfirm string `gorm:"passwordConfirm" binding:"required"`
 }
 
-type Userlogout struct {
-	
+type UserDelete struct {
+	ID uuid.UUID `json:"user_id"`
 }

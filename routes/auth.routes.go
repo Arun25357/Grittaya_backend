@@ -20,4 +20,5 @@ func (rc *AuthRouteController) AuthRoute(rg *gin.RouterGroup) {
 	router.POST("/register", rc.authController.SignUpUser)
 	router.POST("/login", rc.authController.SignInUser)
 	router.POST("/logout", middleware.MiddlewareUser(), rc.authController.LogoutUser)
+	router.DELETE("/detele",rc.authController.DeleteUser)
 }
