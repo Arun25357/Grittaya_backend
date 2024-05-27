@@ -118,15 +118,13 @@ func (pc *ProductController) GetProducts(ctx *gin.Context) {
 
 func (pc *ProductController) CreateProduct(ctx *gin.Context) {
 	var payload models.CreateProduct
-
-	if err := ctx.ShouldBindJSON(&payload); err != nil {
-		log.Println("Error binding JSON:", err)
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	// Retrieve form data
 	file, err := ctx.FormFile("attach_file")
-	log.Print(file)
+	log.Print(file.Filename)
+
+	
+
+	// Retrieve form data
+	
 	// Check if file was uploaded
 	var attachFile string
 	if err != nil {
@@ -199,12 +197,12 @@ func (pc *ProductController) CreateProduct(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "400", "message": "Can't create new ticket"})
 		return
 	}
-	
+
 	if err := pc.DB.Save(&product).Error; err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to save ticket"})
 		return
 	}
-	
+
 	ctx.JSON(http.StatusCreated, gin.H{"status": "201", "data": product})
 }
 
