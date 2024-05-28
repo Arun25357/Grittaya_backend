@@ -180,6 +180,9 @@ func (pc *ProductController) CreateProduct(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	fmt.Println(payload)
+	// return
 	product := models.Product{
 		Name:     payload.Name,
 		Amount:   payload.Amount,
