@@ -36,5 +36,7 @@ func (uc *UserController) GetUser(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": user}})
 }
+func (uc *UserController) Test(ctx *gin.Context) {
 
-
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": nil})
+}

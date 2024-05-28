@@ -6,18 +6,17 @@ import (
 )
 
 type SetProductRouteController struct {
-	setProductController controllers.SetProductController
+	setProductController *controllers.SetProductController
 }
 
-func NewSetProductRouteController(setProductController controllers.SetProductController) SetProductRouteController {
-	return SetProductRouteController{setProductController}
+func NewSetProductRouteController(setProductController *controllers.SetProductController) *SetProductRouteController {
+	return &SetProductRouteController{setProductController}
 }
 
-func (rc *SetProductRouteController) SetProductRoutes(rg *gin.RouterGroup) {
+func (r *SetProductRouteController) SetProductRoutes(rg *gin.RouterGroup) {
 	router := rg.Group("/setproducts")
-	router.POST("/CreateSetProduct", rc.setProductController.CreateSetProduct)
-	router.POST("/UpdateSetProduct", rc.setProductController.UpdateSetProduct)
-	router.DELETE("/DeleteSetProduct", rc.setProductController.DeleteSetProduct)
-	router.GET("/GetSetProduct", rc.setProductController.GetSetProduct)
-	router.GET("/GetAllSetProducts", rc.setProductController.GetAllSetProducts)
+	router.POST("/CreateSetProduct", r.setProductController.CreateSetProduct)
+	router.GET("/GetSetProduct:id", r.setProductController.GetSetProduct)
+	router.POST("/UpdateSetProduct:id", r.setProductController.UpdateSetProduct)
+	router.DELETE("/DeleteSetProduct:id", r.setProductController.DeleteSetProduct)
 }

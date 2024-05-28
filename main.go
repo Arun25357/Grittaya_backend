@@ -20,10 +20,12 @@ var (
 	UserRouteController       routes.UserRouteController
 	ProductController         controllers.ProductController
 	ProductRouteController    routes.ProductRouteController
-	SetProductController      controllers.SetProductController
-	SetProductRouteController routes.SetProductRouteController
+	SetProductController      *controllers.SetProductController
+	SetProductRouteController *routes.SetProductRouteController
 	DiscountController        controllers.DiscountController
 	DiscountRouteController   routes.DiscountRouteController
+	OrderController           *controllers.OrderController
+	OrderRouteController      *routes.OrderRouteController
 )
 
 func init() {
@@ -33,21 +35,23 @@ func init() {
 	}
 
 	initializers.ConnectDB(&config)
-
 	AuthController = controllers.NewAuthController(initializers.DB)
 	AuthRouteController = routes.NewAuthRouteController(AuthController)
 
 	UserController = controllers.NewUserController(initializers.DB)
-	UserRouteController = routes.UserRouteController(UserRouteController)
+	UserRouteController = routes.NewRouteUserController(UserController)
 
 	ProductController = controllers.NewProductController(initializers.DB)
 	ProductRouteController = routes.NewProductRouteController(ProductController)
 
-	SetProductController = *controllers.NewSetProductController(initializers.DB)
+	SetProductController = controllers.NewSetProductController(initializers.DB)
 	SetProductRouteController = routes.NewSetProductRouteController(SetProductController)
 
 	DiscountController = controllers.NewDiscountController(initializers.DB)
 	DiscountRouteController = routes.NewDiscountRouteController(DiscountController)
+
+	OrderController = controllers.NewOrderController(initializers.DB)
+	OrderRouteController = routes.NewOrderRouteController(OrderController)
 
 	server = gin.Default()
 }
@@ -80,6 +84,7 @@ func main() {
 	ProductRouteController.ProductRoute(router)
 	SetProductRouteController.SetProductRoutes(router)
 	DiscountRouteController.DiscountRoutes(router)
+	OrderRouteController.OrderRoute(router)
 
 	log.Fatal(server.Run(":" + config.BackendPort))
 }

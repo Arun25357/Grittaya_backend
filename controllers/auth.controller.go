@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/Pure227/Grittaya_backend/constants"
 	"github.com/Pure227/Grittaya_backend/initializers"
@@ -67,51 +66,53 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 
 // [...] SignIn User
 func (ac *AuthController) SignInUser(ctx *gin.Context) {
-	var payload *models.UserSignInInput
 
-	if err := ctx.ShouldBindJSON(&payload); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
-		return
-	}
-	var tokenData models.Token
-	var adminData models.User
-	var result *gorm.DB
-	var user models.User
-	result = ac.DB.First(&user, "username = ?", strings.ToLower(payload.Username))
-	if result.Error != nil {
-		// Handle error
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Error retrieving user data"})
-		return
-	}
+	ctx.JSON(http.StatusOK, gin.H{"status": "success"})
+	// var payload *models.UserSignInInput
 
-	if err := utils.VerifyPassword(user.Password, payload.Password); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid Username or Password"})
-		return
-	}
+	// if err := ctx.ShouldBindJSON(&payload); err != nil {
+	// 	ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+	// 	return
+	// }
+	// var tokenData models.Token
+	// var adminData models.User
+	// var result *gorm.DB
+	// var user models.User
+	// result = ac.DB.First(&user, "username = ?", strings.ToLower(payload.Username))
+	// if result.Error != nil {
+	// 	// Handle error
+	// 	ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Error retrieving user data"})
+	// 	return
+	// }
 
-	config, _ := initializers.LoadConfig(".")
+	// if err := utils.VerifyPassword(user.Password, payload.Password); err != nil {
+	// 	ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid Username or Password"})
+	// 	return
+	// }
 
-	// Generate token that expire in 24 hours
-	token, err := utils.GenerateToken(config.TokenExpiresIn, adminData.ID, config.TokenSecret)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
-		return
-	}
+	// config, _ := initializers.LoadConfig(".")
 
-	adminData = user
-	tokenData = models.Token{
-		User_ID:   adminData.ID.String(),
-		Token:     token,
-		CreatedAt: time.Now().Unix(),
-	}
+	// // Generate token that expire in 24 hours
+	// token, err := utils.GenerateToken(config.TokenExpiresIn, adminData.ID, config.TokenSecret)
+	// if err != nil {
+	// 	ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+	// 	return
+	// }
 
-	if ac.DB.Where("user_id = ?", adminData.ID) != nil {
-		ac.DB.Model(&tokenData).Where("user_id = ?", adminData.ID).Delete(&tokenData)
-	}
+	// adminData = user
+	// tokenData = models.Token{
+	// 	User_ID:   adminData.ID.String(),
+	// 	Token:     token,
+	// 	CreatedAt: time.Now().Unix(),
+	// }
 
-	ac.DB.Save(&tokenData)
+	// if ac.DB.Where("user_id = ?", adminData.ID) != nil {
+	// 	ac.DB.Model(&tokenData).Where("user_id = ?", adminData.ID).Delete(&tokenData)
+	// }
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "token": token, "position": adminData.Position, "UserID": adminData.ID})
+	// ac.DB.Save(&tokenData)
+
+	// ctx.JSON(http.StatusOK, gin.H{"status": "success", "token": token, "position": adminData.Position, "UserID": adminData.ID})
 }
 
 // [...] SignOut User
