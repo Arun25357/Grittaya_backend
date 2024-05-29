@@ -35,7 +35,7 @@ func (pc *ProductController) GetAllProduct(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": "Invalid page number"})
 		return
 	}
-	perPageStr := ctx.DefaultQuery("perPage", "50")
+	perPageStr := ctx.DefaultQuery("perPage", "500")
 	perPage, err := strconv.Atoi(perPageStr)
 	if err != nil || perPage < 1 {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": "Invalid items per page number"})

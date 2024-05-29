@@ -28,7 +28,6 @@ func (ctrl *SetProductController) CreateSetProduct(c *gin.Context) {
 		Name:      input.Name,
 		Amount:    input.Amount,
 		Price:     input.Price,
-		ProductID: input.ProductID,
 		Status:    input.Status,
 	}
 
