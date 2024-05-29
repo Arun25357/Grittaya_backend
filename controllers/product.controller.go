@@ -13,7 +13,6 @@ import (
 	"strconv"
 
 	"github.com/Pure227/Grittaya_backend/models"
-	uuid "github.com/satori/go.uuid"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -35,7 +34,7 @@ func (pc *ProductController) GetAllProduct(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": "Invalid page number"})
 		return
 	}
-	perPageStr := ctx.DefaultQuery("perPage", "500")
+	perPageStr := ctx.DefaultQuery("perPage", "50")
 	perPage, err := strconv.Atoi(perPageStr)
 	if err != nil || perPage < 1 {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": "Invalid items per page number"})
