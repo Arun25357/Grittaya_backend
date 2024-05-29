@@ -43,6 +43,7 @@ func (cc *CustomerController) CreateCustomer(ctx *gin.Context) {
 		Phone:    payload.Phone,
 		Location: payload.Location,
 		Postcode: payload.Postcode,
+		Platform: payload.Platform,
 	}
 
 	if err := cc.DB.Create(&newCustomer).Error; err != nil {
@@ -54,6 +55,6 @@ func (cc *CustomerController) CreateCustomer(ctx *gin.Context) {
 		"name":     newCustomer.Name,
 		"location": newCustomer.Location,
 		"postcode": newCustomer.Postcode,
+		"platform": newCustomer.Platform,
 	})
 }
-

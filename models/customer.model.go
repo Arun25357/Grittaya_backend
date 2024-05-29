@@ -8,7 +8,7 @@ type Customer struct {
 	Phone    string    `gorm:"type:varchar(10);not null;primary_key"`
 	Location string    `gorm:"not null"`
 	Postcode int       `gorm:"not null"`
-	Platform int       `gorm:"not null"`
+	Platform string    `gorm:"not null"`
 }
 
 type CustomerDetails struct {
@@ -16,5 +16,5 @@ type CustomerDetails struct {
 	Phone    string `json:"phone"`
 	Location string `json:"location"`
 	Postcode int    `json:"postcode"`
-	Platform int    `json:"platform"`
+	Platform string `json:"platform"`
 }

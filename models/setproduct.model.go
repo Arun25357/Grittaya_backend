@@ -15,32 +15,30 @@ type SetProduct struct {
 }
 
 type CreateSetProduct struct {
-	Name      string    `json:"setproduct_name" binding:"required"`
-	Amount    int       `json:"setproduct_amount" binding:"required"`
-	Price     float64   `json:"setproduct_price" binding:"required"`
-	ProductID uuid.UUID `json:"product_id" binding:"required"`
-	Status    int       `json:"status" binding:"required"`
-	Type      string    `json:"setproduct_type"`
+	Name   string  `json:"set_product_name" binding:"required"`
+	Amount int     `json:"set_product_amount" binding:"required"`
+	Price  float64 `json:"set_product_price" binding:"required"`
+	Status int     `json:"status" binding:"required"`
+	Type   string  `json:"set_product_type"`
 }
 
 type UpdateSetProduct struct {
 	ID        uuid.UUID `json:"id" binding:"required"`
-	Name      string    `json:"setproduct_name"`
-	Amount    int       `json:"setproduct_amount"`
-	Price     float64   `json:"setproduct_price"`
-	ProductID uuid.UUID `json:"product_id"`
+	Name      string    `json:"set_product_name"`
+	Amount    int       `json:"set_product_amount"`
+	Price     float64   `json:"set_product_price"`
 	Status    int       `json:"status"`
-	Type      string    `json:"setproduct_type"`
+	Type      string    `json:"set_product_type"`
 }
 
 type GetSetProduct struct {
 	ID        uuid.UUID `json:"id"`
-	Name      string    `json:"setproduct_name"`
-	Amount    int       `json:"setproduct_amount"`
-	Price     float64   `json:"setproduct_price"`
+	Name      string    `json:"set_product_name"`
+	Amount    int       `json:"set_product_amount"`
+	Price     float64   `json:"set_product_price"`
 	ProductID uuid.UUID `json:"product_id"`
 	Status    int       `json:"status"`
-	Type      string    `json:"setproduct_type"`
+	Type      string    `json:"set_product_type"`
 }
 
 type DeleteSetProduct struct {

@@ -2,10 +2,10 @@ package controllers
 
 import (
 	"net/http"
+
+	"github.com/Pure227/Grittaya_backend/models"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-	"github.com/satori/go.uuid"
-	"github.com/Pure227/Grittaya_backend/models"
 )
 
 type OrderController struct {
@@ -16,77 +16,52 @@ func NewOrderController(db *gorm.DB) *OrderController {
 	return &OrderController{DB: db}
 }
 
-
-// func (ctrl *OrderController) CreateOrder(c *gin.Context) {
-// 	var input models.CreateOrder
-// 	if err := c.ShouldBindJSON(&input); err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-// 		return
-// 	}
-
-// 	order := models.Order{
-// 		ID:               uuid.NewV4(),
-// 		OrderDate:        input.OrderDate,
-// 		Status:           input.Status,
-// 		CustomerUsername: input.CustomerUsername,
-// 		Platform:         input.Platform,
-// 		DeliveryType:     input.DeliveryType,
-// 		TotalPrice:       input.TotalPrice,
-// 		Discount:         input.Discount,
-// 		SetproductID:     input.SetproductID,
-// 		CustomerID:       input.CustomerID,
-// 		UserID:           input.UserID,
-// 	}
-
-// 	if err := ctrl.DB.Create(&order).Error; err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-// 		return
-// 	}
-
-// 	c.JSON(http.StatusOK, order)
-// }
-
 func (ctrl *OrderController) CreateOrder(c *gin.Context) {
-	var input models.CreateOrder
-	if err := c.ShouldBindJSON(&input); err != nil {
+	var payload models.CreateOrder
+	if err := c.ShouldBindJSON(&payload); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-    // Check if the customer exists
-    var customer models.Customer
-    if err := ctrl.DB.First(&customer, "id = ?", input.CustomerID).Error; err != nil {
-        c.JSON(http.StatusNotFound, gin.H{"error": "Customer not found"})
-        return
-    }
-
-	order := models.Order{
-		ID:               uuid.NewV4(),
-		OrderDate:        input.OrderDate,
-		Status:           input.Status,
-		CustomerUsername: input.CustomerUsername,
-		Platform:         input.Platform,
-		DeliveryType:     input.DeliveryType,
-		TotalPrice:       input.TotalPrice,
-		Discount:         input.Discount,
-		SetproductID:     input.SetproductID,
-		CustomerID:       input.CustomerID,
-		UserID:           input.UserID,
-        Postcode:         input.Postcode,
-        SetproductName:   input.Name,
-        Amount:           input.Amount,
-        Type:             input.Type,
-        Price:            input.Price,
-        PaymentType:      input.PaymentType,
-        TotalpricePayment: input.TotalpricePayment,
+	// Check if the customer exists
+	var customer models.Customer
+	if err := ctrl.DB.First(&customer, "id = ?", payload.CustomerID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Customer not found"})
+		return
+	}
+	//Search Productname
+	var product models.Product
+	if err := ctrl.DB.First(&product, "name = ?", payload.SetProductName).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
+		return
 	}
 
-	if err := ctrl.DB.Create(&order).Error; err != nil {
+	newOrder := models.CreateOrder{
+		OrderDate:        payload.OrderDate,
+		Status:           payload.Status,
+		CustomerUsername: payload.CustomerUsername,
+		Platform:         payload.Platform,
+		DeliveryType:     payload.DeliveryType,
+		TotalPrice:       payload.TotalPrice,
+		Discount:         payload.Discount,
+		SetProductID:     product.ID,
+		CustomerID:       payload.CustomerID,
+		UserID:           payload.UserID,
+		Postcode:         payload.Postcode,
+		SetProductName:   product.Name,
+		Amount:           payload.Amount,
+		Type:             product.Type,
+		Price:            product.Price,
+		PaymentType:      payload.PaymentType,
+		LastPricePayment: payload.LastPricePayment,
+	}
+
+	if err := ctrl.DB.Create(&newOrder).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, order)
+	c.JSON(http.StatusOK, newOrder)
 }
 
 func (ctrl *OrderController) GetOrder(c *gin.Context) {
