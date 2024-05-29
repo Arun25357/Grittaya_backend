@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/Pure227/Grittaya_backend/constants"
 	"github.com/Pure227/Grittaya_backend/initializers"
@@ -66,65 +67,49 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 
 // [...] SignIn User
 func (ac *AuthController) SignInUser(ctx *gin.Context) {
+	var payload *models.UserSignInInput
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "success"})
-	// var payload *models.UserSignInInput
-
-	// if err := ctx.ShouldBindJSON(&payload); err != nil {
-	// 	ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
-	// 	return
-	// }
-	// var tokenData models.Token
-	// var adminData models.User
-	// var result *gorm.DB
-	// var user models.User
-	// result = ac.DB.First(&user, "username = ?", strings.ToLower(payload.Username))
-	// if result.Error != nil {
-	// 	// Handle error
-	// 	ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Error retrieving user data"})
-	// 	return
-	// }
-
-	// if err := utils.VerifyPassword(user.Password, payload.Password); err != nil {
-	// 	ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid Username or Password"})
-	// 	return
-	// }
-
-	// config, _ := initializers.LoadConfig(".")
-
-	// // Generate token that expire in 24 hours
-	// token, err := utils.GenerateToken(config.TokenExpiresIn, adminData.ID, config.TokenSecret)
-	// if err != nil {
-	// 	ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
-	// 	return
-	// }
-
-	// adminData = user
-	// tokenData = models.Token{
-	// 	User_ID:   adminData.ID.String(),
-	// 	Token:     token,
-	// 	CreatedAt: time.Now().Unix(),
-	// }
-
-	// if ac.DB.Where("user_id = ?", adminData.ID) != nil {
-	// 	ac.DB.Model(&tokenData).Where("user_id = ?", adminData.ID).Delete(&tokenData)
-	// }
-
-	// ac.DB.Save(&tokenData)
-
-	// ctx.JSON(http.StatusOK, gin.H{"status": "success", "token": token, "position": adminData.Position, "UserID": adminData.ID})
-}
-
-// [...] SignOut User
-func (ac *AuthController) LogoutUser(ctx *gin.Context) {
-	userID := GetUserIDByToken(ctx)
-	var tokenData *models.Token
-	if ac.DB.First(&tokenData, "user_id", userID).Delete(&tokenData).Error != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "You're already logged out"})
+	if err := ctx.ShouldBindJSON(&payload); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
-	} else {
-		ctx.JSON(http.StatusOK, gin.H{"status": "success"})
 	}
+
+	var user models.User
+	result := ac.DB.First(&user, "username = ?", strings.ToLower(payload.Username))
+	if result.Error != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Error retrieving user data"})
+		return
+	}
+
+	if err := utils.VerifyPassword(user.Password, payload.Password); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid Username or Password"})
+		return
+	}
+
+	config, _ := initializers.LoadConfig(".")
+	token, err := utils.GenerateToken(config.TokenExpiresIn, user.ID.String(), config.TokenSecret)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
+
+	tokenData := models.Token{
+		User_ID:   user.ID.String(),
+		Token:     token,
+		CreatedAt: time.Now().Unix(),
+	}
+
+	if ac.DB.Where("user_id = ?", user.ID).Delete(&models.Token{}).Error != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "Could not delete existing tokens"})
+		return
+	}
+
+	if err := ac.DB.Save(&tokenData).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "Could not save token"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "token": token, "position": user.Position, "UserID": user.ID})
 }
 
 func GetUserIDByToken(ctx *gin.Context) (response string) {
@@ -134,11 +119,11 @@ func GetUserIDByToken(ctx *gin.Context) (response string) {
 
 	if authorizationHeader == "" {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
+		return ""
 	}
 	if len(fields) != 2 || fields[0] != "Bearer" {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
+		return ""
 	}
 	token = fields[1]
 
@@ -146,12 +131,18 @@ func GetUserIDByToken(ctx *gin.Context) (response string) {
 	sub, err := utils.ValidateToken(token, config.TokenSecret)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "fail", "message": err.Error()})
-		return
+		return ""
 	}
 
-	useridstring := fmt.Sprint(sub)
-	// fmt.Println(useridstring)
-	return useridstring
+	userID := fmt.Sprint(sub)
+	if userID == "" {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return ""
+	}
+
+	fmt.Println("Extracted user ID:", userID) // Logging the extracted user ID
+
+	return userID
 }
 
 func (ac *AuthController) GetUserDataByToken(ctx *gin.Context) (models.User, error) {
@@ -182,6 +173,33 @@ func (ac *AuthController) GetUserDataByToken(ctx *gin.Context) (models.User, err
 	}
 
 	return user, nil
+}
+
+// [...] SignOut User
+func (ac *AuthController) LogoutUser(ctx *gin.Context) {
+	adminData := GetUserIDByToken(ctx)
+	if adminData == "" {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"status": "fail", "message": "Unauthorized"})
+		return
+	}
+
+	var tokenData models.Token
+	result := ac.DB.First(&tokenData, "user_id = ?", adminData)
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "You're already logged out"})
+		} else {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "An error occurred while logging out"})
+		}
+		return
+	}
+
+	if err := ac.DB.Delete(&tokenData).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "An error occurred while logging out"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "Successfully logged out"})
 }
 
 func (pc *AuthController) DeleteUser(ctx *gin.Context) {
