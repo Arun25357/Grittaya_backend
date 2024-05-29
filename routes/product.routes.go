@@ -16,7 +16,7 @@ func NewProductRouteController(productController controllers.ProductController) 
 func (rc *ProductRouteController) ProductRoute(rg *gin.RouterGroup) {
 	router := rg.Group("/products")
 
-	router.GET("/GetProducts", rc.productController.GetProducts)
+	router.GET("/GetProduct/:id", rc.productController.GetProducts)
 	router.POST("/CreateProduct", rc.productController.CreateProduct)
 	router.GET("/GetAllProduct", rc.productController.GetAllProduct)
 	router.POST("/UpdateProduct", rc.productController.UpdateProduct)

@@ -6,6 +6,7 @@ import (
 	// "path/filepath"
 	// "strings"
 	// "time"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -33,7 +34,7 @@ func (pc *ProductController) GetAllProduct(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": "Invalid page number"})
 		return
 	}
-	perPageStr := ctx.DefaultQuery("perPage", "10")
+	perPageStr := ctx.DefaultQuery("perPage", "50")
 	perPage, err := strconv.Atoi(perPageStr)
 	if err != nil || perPage < 1 {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": "Invalid items per page number"})
@@ -76,7 +77,7 @@ func (pc *ProductController) GetAllProduct(ctx *gin.Context) {
 
 	// Return paginated tickets
 	ctx.JSON(http.StatusOK, gin.H{"status": "200", "data": gin.H{
-		"projects":    getProducts,
+		"products":    getProducts,
 		"totalCount":  totalCount,
 		"currentPage": page,
 		"perPage":     perPage,
@@ -85,23 +86,54 @@ func (pc *ProductController) GetAllProduct(ctx *gin.Context) {
 	}})
 }
 
+type GetProductByID struct {
+	ID string `uri:"id"`
+}
+
 func (pc *ProductController) GetProducts(ctx *gin.Context) {
 	// Parse query parameter
-	productIDStr := ctx.Params.ByName("productID")
-	productID, err := strconv.Atoi(productIDStr)
-	if err != nil || productID < 1 {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": "Invalid product ID"})
+
+	req := GetProductByID{}
+	if err := ctx.BindUri(&req); err != nil {
+		ctx.JSON(400, gin.H{"msg": err.Error()})
 		return
 	}
 
-	// Retrieve the ticket
+	fmt.Println(req.ID)
+	// productIDStr := ctx.Query("productID")
+	// productID, err := strconv.Atoi(productIDStr)
+	// if err != nil || productID < 1 {
+	// 	ctx.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": "Invalid product ID"})
+	// 	return
+	// }
+
+	// Retrieve the product
 	var product models.Product
-	if err := pc.DB.First(&product, productID).Error; err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to retrieve the product"})
+
+	if err := pc.DB.Where("id = ?", req.ID).First(&product).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"status": "404", "message": "Product not found"})
+			fmt.Println(err)
+			return
+		}
+
+		fmt.Println(1)
+		fmt.Println(err)
 		return
 	}
 
-	// Convert the ticket to response format
+	// fmt.Println(2)
+	// if err := pc.DB.First(&product, req.ID).Error; err != nil {
+	// 	if errors.Is(err, gorm.ErrRecordNotFound) {
+	// 		ctx.JSON(http.StatusNotFound, gin.H{"status": "404", "message": "Product not found"})
+	// 	} else {
+	// 		fmt.Println(err)
+	// 		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to retrieve the product"})
+	// 	}
+	// 	return
+	// }
+
+	// Convert the product to response format
 	getProduct := &models.GetProduct{
 		ID:          product.ID,
 		Name:        product.Name,
@@ -112,7 +144,7 @@ func (pc *ProductController) GetProducts(ctx *gin.Context) {
 		Description: product.Description,
 	}
 
-	// Return the ticket
+	// Return the product
 	ctx.JSON(http.StatusOK, gin.H{"status": "200", "data": getProduct})
 }
 
