@@ -13,6 +13,7 @@ type Product struct {
 	Category    string    `gorm:"type:varchar(255);not null"`
 	Description string    `gorm:"type:varchar(255);not null"`
 	AttachFile  string
+	Status      int `gorm:"not null"`
 }
 
 type CreateProduct struct {
@@ -44,6 +45,10 @@ type GetProduct struct {
 	Category    string    `json:"product_category"`
 	Description string    `json:"product_description"`
 	AttachFile  string    `json:"attach_file"`
+}
+
+type StatusProduct struct {
+	Status int `json:"status_product"`
 }
 
 type DeleteProduct struct {
