@@ -1,7 +1,7 @@
 package models
 
 import (
-	uuid "github.com/satori/go.uuid"
+    uuid "github.com/satori/go.uuid"
 )
 
 type SetProduct struct {
@@ -40,5 +40,5 @@ type GetSetProduct struct {
 }
 
 type DeleteSetProduct struct {
-	ID uuid.UUID `json:"id" binding:"required"`
+    ID uuid.UUID `json:"id" binding:"required"`
 }
