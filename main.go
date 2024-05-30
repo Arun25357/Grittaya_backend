@@ -26,6 +26,8 @@ var (
 	DiscountRouteController   routes.DiscountRouteController
 	OrderController           *controllers.OrderController
 	OrderRouteController      *routes.OrderRouteController
+	CustomerController        controllers.CustomerController
+	CustomerRouteController   routes.CustomerRouteController
 )
 
 func init() {
@@ -52,6 +54,9 @@ func init() {
 
 	OrderController = controllers.NewOrderController(initializers.DB)
 	OrderRouteController = routes.NewOrderRouteController(OrderController)
+
+	CustomerController = controllers.NewCustomerController(initializers.DB)
+	CustomerRouteController = routes.NewCustomerRouteController(CustomerController)
 
 	server = gin.Default()
 }
@@ -85,6 +90,7 @@ func main() {
 	SetProductRouteController.SetProductRoutes(router)
 	DiscountRouteController.DiscountRoutes(router)
 	OrderRouteController.OrderRoute(router)
+	CustomerRouteController.CustomerRoute(router)
 
 	log.Fatal(server.Run(":" + config.BackendPort))
 }

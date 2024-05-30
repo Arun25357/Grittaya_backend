@@ -25,33 +25,33 @@ func (ctrl *OrderController) CreateOrder(c *gin.Context) {
 
 	// Check if the customer exists
 	var customer models.Customer
-	if err := ctrl.DB.First(&customer, "id = ?", payload.CustomerID).Error; err != nil {
+	if err := ctrl.DB.First(&customer, "name = ?", payload.CustomerName).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Customer not found"})
 		return
 	}
 	//Search Productname
-	var product models.Product
-	if err := ctrl.DB.First(&product, "name = ?", payload.SetProductName).Error; err != nil {
+	var setproduct models.SetProduct
+	if err := ctrl.DB.First(&setproduct, "name = ?", payload.SetProductName).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
 		return
 	}
 
-	newOrder := models.CreateOrder{
+	newOrder := models.Order{
 		OrderDate:        payload.OrderDate,
 		Status:           payload.Status,
-		CustomerUsername: payload.CustomerUsername,
+		CustomerName:     payload.CustomerName,
 		Platform:         payload.Platform,
 		DeliveryType:     payload.DeliveryType,
 		TotalPrice:       payload.TotalPrice,
 		Discount:         payload.Discount,
-		SetProductID:     product.ID,
-		CustomerID:       payload.CustomerID,
+		CustomerID:       customer.ID,
+		SetProductID:     setproduct.ID,
 		UserID:           payload.UserID,
 		Postcode:         payload.Postcode,
-		SetProductName:   product.Name,
+		SetProductName:   setproduct.Name,
 		Amount:           payload.Amount,
-		Type:             product.Type,
-		Price:            product.Price,
+		Type:             setproduct.Type,
+		Price:            setproduct.Price,
 		PaymentType:      payload.PaymentType,
 		LastPricePayment: payload.LastPricePayment,
 	}
@@ -62,6 +62,63 @@ func (ctrl *OrderController) CreateOrder(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, newOrder)
+}
+
+func (pc *OrderController) UpdateOrder(ctx *gin.Context) {
+	// Bind URI payload to get the order ID or other URI parameters
+	var order models.Order
+	if err := ctx.BindUri(&order); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": err.Error()})
+		return
+	}
+
+	// Bind JSON payload to get the update data
+	var payload models.UpdateOrder
+	if err := ctx.ShouldBindJSON(&payload); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": err.Error()})
+		return
+	}
+
+	// Search for the product by name
+	var setproduct models.SetProduct
+	if err := pc.DB.First(&setproduct, "name = ?", payload.SetProductName).Error; err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
+		return
+	}
+
+	// Create the update order struct
+	updateorder := models.UpdateOrder{
+		ID:               payload.ID,
+		OrderDate:        payload.OrderDate,
+		Status:           payload.Status,
+		CustomerName:     payload.CustomerName,
+		Platform:         payload.Platform,
+		DeliveryType:     payload.DeliveryType,
+		TotalPrice:       payload.TotalPrice,
+		Discount:         payload.Discount,
+		SetProductID:     setproduct.ID,
+		UserID:           payload.UserID,
+		Postcode:         payload.Postcode,
+		SetProductName:   setproduct.Name,
+		Amount:           payload.Amount,
+		Type:             setproduct.Type,
+		Price:            setproduct.Price,
+		PaymentType:      payload.PaymentType,
+		LastPricePayment: payload.LastPricePayment,
+		// AttachFile:  payload.AttachFile,
+	}
+
+	if err := pc.DB.First(&order, "ID = ?", updateorder.ID).Error; err != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "400", "message": "Order not found"})
+		return
+	}
+
+	if err := pc.DB.Model(&order).Where("ID = ?", updateorder.ID).Updates(updateorder).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to update Order"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "200", "message": "Order updated successfully"})
 }
 
 func (ctrl *OrderController) GetOrder(c *gin.Context) {
