@@ -1,89 +1,177 @@
 package controllers
 
 import (
+	"errors"
+	"fmt"
+	"log"
 	"net/http"
+	"strconv"
+
+	"github.com/Pure227/Grittaya_backend/models"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-	"github.com/satori/go.uuid"
-	"github.com/Pure227/Grittaya_backend/models"
 )
 
+// SetProductController handles set products
 type SetProductController struct {
 	DB *gorm.DB
 }
 
+// NewSetProductController creates a new SetProductController
 func NewSetProductController(db *gorm.DB) *SetProductController {
 	return &SetProductController{DB: db}
 }
 
+// CreateSetProduct creates a new set product
 func (ctrl *SetProductController) CreateSetProduct(c *gin.Context) {
 	var input models.CreateSetProduct
 	if err := c.ShouldBindJSON(&input); err != nil {
+		log.Println("Error binding JSON:", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	setProduct := models.SetProduct{
-		ID:        uuid.NewV4(),
-		Name:      input.Name,
-		Amount:    input.Amount,
-		Price:     input.Price,
-		Status:    input.Status,
+		Name:   input.Name,
+		Amount: input.Amount,
+		Price:  input.Price,
+		Status: input.Status,
+		Type:   input.Type,
 	}
 
 	if err := ctrl.DB.Create(&setProduct).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": "Can't create new set product"})
 		return
 	}
 
-	c.JSON(http.StatusOK, setProduct)
+	c.JSON(http.StatusCreated, gin.H{"status": "201", "data": setProduct})
 }
 
+// GetSetProduct retrieves a set product by ID
 func (ctrl *SetProductController) GetSetProduct(c *gin.Context) {
 	id := c.Param("id")
-	var setProduct models.SetProduct
 
+	var setProduct models.SetProduct
 	if err := ctrl.DB.Where("id = ?", id).First(&setProduct).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "SetProduct not found"})
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"status": "404", "message": "Set product not found"})
 			return
 		}
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to retrieve set product"})
 		return
 	}
 
-	c.JSON(http.StatusOK, setProduct)
+	c.JSON(http.StatusOK, gin.H{"status": "200", "data": setProduct})
 }
 
-func (ctrl *SetProductController) UpdateSetProduct(c *gin.Context) {
-	id := c.Param("id")
-	var setProduct models.SetProduct
-	if err := ctrl.DB.Where("id = ?", id).First(&setProduct).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "SetProduct not found"})
+// UpdateSetProduct updates an existing set product
+func (pc *SetProductController) UpdateSetProduct(ctx *gin.Context) {
+	var setproduct models.SetProduct
+	if err := ctx.BindUri(&setproduct); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": err.Error()})
 		return
 	}
 
-	var input models.UpdateSetProduct
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	// ทำการค้นหาสินค้าที่ต้องการอัปเดตในฐานข้อมูล
+	var payload models.UpdateSetProduct
+	if err := ctx.ShouldBindJSON(&payload); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": err.Error()})
 		return
 	}
 
-	ctrl.DB.Model(&setProduct).Updates(input)
+	// อัปเดตข้อมูลของสินค้า
+	updatesetproduct := models.UpdateSetProduct{
+		ID:     payload.ID,
+		Name:   payload.Name,
+		Amount: payload.Amount,
+		Price:  payload.Price,
+		Type:   payload.Type,
+	}
 
-	c.JSON(http.StatusOK, setProduct)
+	if err := pc.DB.First(&setproduct, "ID = ?", updatesetproduct.ID).Error; err != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "400", "message": "Product not found"})
+		return
+	}
+
+	if err := pc.DB.Model(&setproduct).Where("ID = ?", updatesetproduct.ID).Updates(updatesetproduct).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to update product"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "200", "message": "Product updated successfully"})
 }
 
+// DeleteSetProduct deletes a set product by ID
 func (ctrl *SetProductController) DeleteSetProduct(c *gin.Context) {
-	id := c.Param("id")
-	if err := ctrl.DB.Where("id = ?", id).Delete(&models.SetProduct{}).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "SetProduct not found"})
-			return
-		}
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	var input models.DeleteSetProduct
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": err.Error()})
 		return
 	}
 
-	c.Status(http.StatusNoContent)
+	if err := ctrl.DB.Where("id = ?", input.ID).Delete(&models.SetProduct{}).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"status": "404", "message": "Set product not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to delete set product"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "200", "message": "Set product deleted successfully"})
 }
+
+// GetAllSetProducts retrieves all set products with pagination
+func (ctrl *SetProductController) GetAllSetProducts(c *gin.Context) {
+	pageStr := c.DefaultQuery("page", "1")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": "Invalid page number"})
+		return
+	}
+	perPageStr := c.DefaultQuery("perPage", "50")
+	perPage, err := strconv.Atoi(perPageStr)
+	if err != nil || perPage < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": "Invalid items per page number"})
+		return
+	}
+
+	var totalCount int64
+	if err := ctrl.DB.Model(&models.SetProduct{}).Count(&totalCount).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to get total number of set products"})
+		return
+	}
+
+	offset := (page - 1) * perPage
+	limit := perPage
+
+	var setProducts []models.SetProduct
+	if err := ctrl.DB.Offset(offset).Limit(limit).Find(&setProducts).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to retrieve set products"})
+		return
+	}
+
+	var getSetProducts []*models.GetSetProduct
+	for _, payload := range setProducts {
+		getSetProduct := &models.GetSetProduct{
+			ID:     payload.ID,
+			Name:   payload.Name,
+			Amount: payload.Amount,
+			Price:  payload.Price,
+			Status: payload.Status,
+			Type:   payload.Type,
+		}
+		getSetProducts = append(getSetProducts, getSetProduct)
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "200", "data": gin.H{
+		"setProducts": getSetProducts,
+		"totalCount":  totalCount,
+		"currentPage": page,
+		"perPage":     perPage,
+		"nextPage":    fmt.Sprintf("?page=%d&perPage=%d", page+1, perPage),
+		"prevPage":    fmt.Sprintf("?page=%d&perPage=%d", page-1, perPage),
+	}})
+}
+
+// The ProductController functions will remain the same as provided in the initial code.
