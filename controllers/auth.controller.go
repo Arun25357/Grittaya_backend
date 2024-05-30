@@ -97,7 +97,10 @@ func (ac *AuthController) SignInUser(ctx *gin.Context) {
 		User_ID:   user.ID.String(),
 		Token:     token,
 		CreatedAt: time.Now().Unix(),
+		
 	}
+
+
 
 	if ac.DB.Where("user_id = ?", user.ID).Delete(&models.Token{}).Error != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "Could not delete existing tokens"})
@@ -109,7 +112,7 @@ func (ac *AuthController) SignInUser(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "token": token, "position": user.Position, "UserID": user.ID})
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "token": token, "position": user.Position, "UserID": user.ID,"Nickname":user.Nickname, "Phone": user.Phone})
 }
 
 func GetUserIDByToken(ctx *gin.Context) (response string) {
