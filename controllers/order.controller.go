@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -45,24 +46,25 @@ func (ctrl *OrderController) CreateOrder(c *gin.Context) {
 		}
 	}
 
+	amount := 0
+	for _, product := range payload.ListProducts {
+		amount += product.Amount
+	}
+
 	newOrder := models.Order{
-		OrderDate:    payload.OrderDate,
-		Status:       payload.Status,
-		CustomerName: payload.CustomerName,
-		Location:     payload.Location,
-		Platform:     payload.Platform,
-		DeliveryType: payload.DeliveryType,
-		TotalPrice:   payload.TotalPrice,
-		Discount:     payload.Discount,
-		CustomerID:   customer.ID,
-		Phone:        payload.Phone,
-		UserID:       payload.UserID,
-		Postcode:     payload.Postcode,
-		Amount:       payload.Amount,
-		// SetProductID:     setproduct.ID,
-		// SetProductName:   setproduct.Name,
-		// Type:             setproduct.Type,
-		// Price:            setproduct.Price,
+		OrderDate:        payload.OrderDate,
+		Status:           0,
+		CustomerName:     payload.CustomerName,
+		Location:         payload.Location,
+		Platform:         payload.Platform,
+		DeliveryType:     payload.DeliveryType,
+		TotalPrice:       payload.TotalPrice,
+		Discount:         payload.Discount,
+		CustomerID:       customer.ID,
+		Phone:            payload.Phone,
+		UserID:           payload.UserID,
+		Postcode:         payload.Postcode,
+		Amount:           amount,
 		PaymentType:      payload.PaymentType,
 		LastPricePayment: payload.LastPricePayment,
 	}
@@ -74,13 +76,34 @@ func (ctrl *OrderController) CreateOrder(c *gin.Context) {
 		return
 	}
 
+	orderDetail := []models.OrderDetail{}
+	for _, product := range payload.ListProducts {
+
+		temp := models.OrderDetail{
+			OrderID:      int(newOrder.ID),
+			SetProductID: product.SetProductID,
+			Amount:       product.Amount,
+		}
+
+		orderDetail = append(orderDetail, temp)
+	}
+
+	if err := ctrl.DB.Create(&orderDetail).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusOK, newOrder)
+}
+
+type GetOrder struct {
+	ID string `uri:"id"`
 }
 
 func (pc *OrderController) UpdateOrder(ctx *gin.Context) {
 	// Bind URI payload to get the order ID or other URI parameters
-	var order models.Order
-	if err := ctx.BindUri(&order); err != nil {
+	var id GetOrder
+	if err := ctx.BindUri(&id); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": err.Error()})
 		return
 	}
@@ -92,56 +115,158 @@ func (pc *OrderController) UpdateOrder(ctx *gin.Context) {
 		return
 	}
 
-	// Retrieve customer details
-	var customer models.Customer
-	if err := pc.DB.First(&customer, payload.CustomerID).Error; err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to retrieve customer"})
+	var orderDetail []models.OrderDetail
+
+	if err := pc.DB.Where("order_id = ?", id.ID).Find(&orderDetail).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"status": "404", "message": "Product not found"})
+			fmt.Println(err)
+			return
+		}
+
+		fmt.Println(1)
+		fmt.Println(err)
 		return
 	}
 
-	// Search for the product by name
-	var setproduct models.SetProduct
-	if err := pc.DB.First(&setproduct, "name = ?", payload.SetProductName).Error; err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
-		return
+	if len(orderDetail) > 0 {
+		if err := pc.DB.Delete(&orderDetail).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				ctx.JSON(http.StatusNotFound, gin.H{"status": "404", "message": "Product not found"})
+				fmt.Println(err)
+				return
+			}
+
+			fmt.Println(1)
+			fmt.Println(err)
+			return
+		}
 	}
 
-	// Create the update order struct
-	updateorder := models.UpdateOrder{
-		ID:               payload.ID,
+	amount := 0
+	for _, product := range payload.ListProducts {
+		amount += product.Amount
+	}
+
+	u64, err := strconv.ParseUint(id.ID, 10, 32)
+	if err != nil {
+		fmt.Println(err)
+	}
+	wd := uint(u64)
+
+	newOrder := models.Order{
+		ID:               uint(wd),
 		OrderDate:        payload.OrderDate,
-		Status:           payload.Status,
+		Status:           0,
 		CustomerName:     payload.CustomerName,
-		Phone:            payload.Phone,
 		Location:         payload.Location,
 		Platform:         payload.Platform,
 		DeliveryType:     payload.DeliveryType,
 		TotalPrice:       payload.TotalPrice,
-		CustomerID:       customer.ID,
 		Discount:         payload.Discount,
-		SetProductID:     setproduct.ID,
+		Phone:            payload.Phone,
 		UserID:           payload.UserID,
 		Postcode:         payload.Postcode,
-		SetProductName:   setproduct.Name,
-		Amount:           payload.Amount,
-		Type:             setproduct.Type,
-		Price:            setproduct.Price,
+		Amount:           amount,
 		PaymentType:      payload.PaymentType,
 		LastPricePayment: payload.LastPricePayment,
-		// AttachFile:  payload.AttachFile,
 	}
 
-	if err := pc.DB.First(&order, "ID = ?", updateorder.ID).Error; err != nil {
-		ctx.JSON(http.StatusBadGateway, gin.H{"status": "400", "message": "Order not found"})
+	if err := pc.DB.Save(&newOrder).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"status": "404", "message": "Product not found"})
+			fmt.Println(err)
+			return
+		}
+
+		fmt.Println(1)
+		fmt.Println(err)
 		return
 	}
 
-	if err := pc.DB.Model(&order).Where("ID = ?", updateorder.ID).Updates(updateorder).Error; err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to update Order"})
+	orderDetail = []models.OrderDetail{}
+	for _, product := range payload.ListProducts {
+
+		temp := models.OrderDetail{
+			OrderID:      int(newOrder.ID),
+			SetProductID: product.SetProductID,
+			Amount:       product.Amount,
+		}
+
+		orderDetail = append(orderDetail, temp)
+	}
+
+	if err := pc.DB.Create(&orderDetail).Error; err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "200", "message": "Order updated successfully"})
+
+	// // Retrieve customer details
+	// var customer models.Customer
+	// if err := pc.DB.First(&customer, payload.CustomerID).Error; err != nil {
+	// 	ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to retrieve customer"})
+	// 	return
+	// }
+
+	// Search for the product by name
+	// var setproduct models.SetProduct
+	// if err := pc.DB.First(&setproduct, "name = ?", payload.SetProductName).Error; err != nil {
+	// 	ctx.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
+	// 	return
+	// }
+
+	// Create the update order struct
+	// for i := 0; i < len(payload.ListProducts); i++ {
+	// 	var e = payload.ListProducts[i]
+	// 	var setproduct models.SetProduct
+	// 	if err := pc.DB.First(&setproduct, "name = ?", e.SetProductName).Error; err != nil {
+	// 		ctx.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
+	// 		return
+	// 	}
+	// }
+
+	// amount := 0
+	// for _, product := range payload.ListProducts {
+	// 	amount += product.Amount
+	// }
+
+	// newOrder := models.Order{
+	// 	ID:           payload.ID,
+	// 	OrderDate:    payload.OrderDate,
+	// 	Status:       0,
+	// 	CustomerName: payload.CustomerName,
+	// 	Location:     payload.Location,
+	// 	Platform:     payload.Platform,
+	// 	DeliveryType: payload.DeliveryType,
+	// 	TotalPrice:   payload.TotalPrice,
+	// 	Discount:     payload.Discount,
+	// 	// CustomerID:       customer.ID,
+	// 	Phone:            payload.Phone,
+	// 	UserID:           payload.UserID,
+	// 	Postcode:         payload.Postcode,
+	// 	Amount:           amount,
+	// 	PaymentType:      payload.PaymentType,
+	// 	LastPricePayment: payload.LastPricePayment,
+	// }
+
+	// if err := pc.DB.First(&order, "ID = ?", newOrder).Error; err != nil {
+	// 	ctx.JSON(http.StatusBadGateway, gin.H{"status": "400", "message": "Order not found"})
+	// 	return
+	// }
+
+	// if err := pc.DB.Model(&order).Where("ID = ?", newOrder.ID).Updates(newOrder).Error; err != nil {
+	// 	ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to update Order"})
+	// 	return
+	// }
+
+	// if err := pc.DB.Delete(&newOrder).Error; err != nil {
+	// 	ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "An error occurred while logging out"})
+	// 	return
+	// }
+
+	// ctx.JSON(http.StatusOK, gin.H{"status": "200", "message": "Order updated successfully"})
 }
 
 func (pc *OrderController) GetOrder(ctx *gin.Context) {
@@ -187,35 +312,29 @@ func (pc *OrderController) GetOrder(ctx *gin.Context) {
 			return
 		}
 
-		// Retrieve customer details
-		var customer models.Customer
-		if err := pc.DB.First(&customer, payload.CustomerID).Error; err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to retrieve customer"})
-			return
-		}
+		// // Retrieve customer details
+		// var customer models.CustomerID
+		// if err := pc.DB.First(&customer, payload.CustomerID).Error; err != nil {
+		// 	ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to retrieve customer"})
+		// 	return
+		// }
 
 		getOrder := &models.GetOrder{
-			ID:               payload.ID,
+			// ID:               uint(wd),
 			OrderDate:        payload.OrderDate,
-			Status:           payload.Status,
+			Status:           0,
 			CustomerName:     payload.CustomerName,
 			Location:         payload.Location,
-			CustomerID:       customer.ID,
-			Phone:            payload.Phone,
 			Platform:         payload.Platform,
 			DeliveryType:     payload.DeliveryType,
 			TotalPrice:       payload.TotalPrice,
 			Discount:         payload.Discount,
-			SetProductID:     setproduct.ID,
+			Phone:            payload.Phone,
 			UserID:           payload.UserID,
 			Postcode:         payload.Postcode,
-			SetProductName:   setproduct.Name,
-			Amount:           payload.Amount,
-			Type:             setproduct.Type,
-			Price:            setproduct.Price,
+			// Amount:           amount,
 			PaymentType:      payload.PaymentType,
 			LastPricePayment: payload.LastPricePayment,
-			// AttachFile:  payload.AttachFile,
 		}
 		getOrders = append(getOrders, getOrder)
 	}

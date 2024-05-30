@@ -59,9 +59,18 @@ type CreateOrder struct {
 	PaymentType      int     `json:"payment_type"`
 	LastPricePayment float64 `json:"last_price_payment"`
 }
+type ListProducts struct {
+	SetProductID   uuid.UUID `json:"set_product_id"`
+	SetProductName string    `json:"set_product_name"`
+	Amount         int       `json:"set_product_amount"`
+	Type           string    `json:"set_product_type"`
+	Price          float64   `json:"set_product_price"`
+	Discount       string    `json:"discount"`
+	TotalPrice     int       `json:"total_price"`
+}
 
 type UpdateOrder struct {
-	ID        uint      `json:"order_id"`
+	ID        uint      `json:"order_id" uri:"id"`
 	OrderDate time.Time `json:"order_date"`
 	Status    int       `json:"status"`
 	UserID    uuid.UUID `json:"user_id"`
@@ -75,13 +84,14 @@ type UpdateOrder struct {
 	Platform     string    `json:"platform"`
 
 	//Setproduct
-	SetProductID   uuid.UUID `json:"set_product_id"`
-	SetProductName string    `json:"set_product_name"`
-	Amount         int       `json:"set_product_amount"`
-	Type           string    `json:"set_product_type"`
-	Price          float64   `json:"set_product_price"`
-	Discount       string    `json:"discount"`
-	TotalPrice     int       `json:"total_price"`
+	SetProductID   uuid.UUID      `json:"set_product_id"`
+	SetProductName string         `json:"set_product_name"`
+	Amount         int            `json:"set_product_amount"`
+	Type           string         `json:"set_product_type"`
+	Price          float64        `json:"set_product_price"`
+	Discount       string         `json:"discount"`
+	TotalPrice     int            `json:"total_price"`
+	ListProducts   []ListProducts `json:"list_products"`
 
 	//Delivery
 	DeliveryType int `json:"delivery_type"`
@@ -126,14 +136,4 @@ type GetOrder struct {
 // DeleteOrder represents the payload for deleting an order
 type DeleteOrder struct {
 	ID uint `json:"id" binding:"required"`
-}
-
-type ListProducts struct {
-	SetProductID   uuid.UUID `json:"set_product_id"`
-	SetProductName string    `json:"set_product_name"`
-	Amount         int       `json:"set_product_amount"`
-	Type           string    `json:"set_product_type"`
-	Price          float64   `json:"set_product_price"`
-	Discount       string    `json:"discount"`
-	TotalPrice     int       `json:"total_price"`
 }
