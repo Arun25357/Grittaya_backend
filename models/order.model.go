@@ -12,12 +12,14 @@ type Order struct {
 	OrderDate        time.Time `gorm:"not null"`
 	Status           int       `gorm:"not null"`
 	CustomerName     string    `gorm:"type:varchar(255);not null"`
+	Location         string    `gorm:"not null"`
 	DeliveryType     int       `gorm:"not null"`
 	TotalPrice       int       `gorm:"not null"`
-	Discount         string    `gorm:"type:varchar(55);uniqueIndex;not null"` // Adjust as needed
+	Discount         string    `gorm:"type:varchar(55);"`
 	SetProductID     uuid.UUID `gorm:"type:uuid;not null"`
 	CustomerID       uuid.UUID `gorm:"type:uuid;not null"`
 	UserID           uuid.UUID `gorm:"type:uuid;not null"`
+	Phone            string    `gorm:"type:varchar(10)"`
 	Postcode         int       `gorm:"not null"`
 	Platform         string    `gorm:"not null"`
 	SetProductName   string    `gorm:"type:varchar(55);not null"`
@@ -33,11 +35,13 @@ type CreateOrder struct {
 	UserID    uuid.UUID `json:"user_id"`
 
 	//customer
-	CustomerID   uuid.UUID `json:"customer_id"`
-	CustomerName string    `json:"customer_name"`
-	Location     string    `json:"location"`
-	Postcode     int       `json:"postcode"`
-	Platform     string    `json:"platform"`
+	CustomerID   uuid.UUID      `json:"customer_id"`
+	CustomerName string         `json:"customer_name"`
+	Location     string         `json:"location"`
+	Postcode     int            `json:"postcode"`
+	Phone        string         `json:"phone"`
+	Platform     string         `json:"platform"`
+	ListProducts []ListProducts `json:"list_products"`
 
 	//Setproduct
 	SetProductID   uuid.UUID `json:"set_product_id"`
@@ -57,16 +61,17 @@ type CreateOrder struct {
 }
 
 type UpdateOrder struct {
-	ID        uuid.UUID `json:"order_id"`
-	OrderDate time.Time `json:"order_date" binding:"required"`
-	Status    int       `json:"status" binding:"required"`
-	UserID    uuid.UUID `json:"user_id" binding:"required"`
+	ID        uint      `json:"order_id"`
+	OrderDate time.Time `json:"order_date"`
+	Status    int       `json:"status"`
+	UserID    uuid.UUID `json:"user_id"`
 
 	//Update customer
 	CustomerID   uuid.UUID `json:"customer_id"`
 	CustomerName string    `json:"customer_name"`
 	Location     string    `json:"location"`
 	Postcode     int       `json:"postcode"`
+	Phone        string    `json:"phone"`
 	Platform     string    `json:"platform"`
 
 	//Setproduct
@@ -88,15 +93,17 @@ type UpdateOrder struct {
 
 // GetOrder represents the payload for retrieving an order
 type GetOrder struct {
-	OrderDate time.Time `json:"order_date" binding:"required"`
-	Status    int       `json:"status" binding:"required"`
-	UserID    uuid.UUID `json:"user_id" binding:"required"`
+	ID        uint      `json:"order_id"`
+	OrderDate time.Time `json:"order_date"`
+	Status    int       `json:"status"`
+	UserID    uuid.UUID `json:"user_id"`
 
 	//Getorder customer
 	CustomerID   uuid.UUID `json:"customer_id"`
 	CustomerName string    `json:"customer_name"`
 	Location     string    `json:"location"`
 	Postcode     int       `json:"postcode"`
+	Phone        string    `json:"phone"`
 	Platform     string    `json:"platform"`
 
 	//Getorder Setproduct
@@ -118,5 +125,15 @@ type GetOrder struct {
 
 // DeleteOrder represents the payload for deleting an order
 type DeleteOrder struct {
-	ID uuid.UUID `json:"id" binding:"required"`
+	ID uint `json:"id" binding:"required"`
+}
+
+type ListProducts struct {
+	SetProductID   uuid.UUID `json:"set_product_id"`
+	SetProductName string    `json:"set_product_name"`
+	Amount         int       `json:"set_product_amount"`
+	Type           string    `json:"set_product_type"`
+	Price          float64   `json:"set_product_price"`
+	Discount       string    `json:"discount"`
+	TotalPrice     int       `json:"total_price"`
 }

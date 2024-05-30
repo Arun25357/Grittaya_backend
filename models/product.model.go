@@ -45,6 +45,7 @@ type GetProduct struct {
 	Category    string    `json:"product_category"`
 	Description string    `json:"product_description"`
 	AttachFile  string    `json:"attach_file"`
+	Status      int       `json:"status"`
 }
 
 type StatusProduct struct {

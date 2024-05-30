@@ -16,7 +16,7 @@ func NewOrderRouteController(orderController *controllers.OrderController) *Orde
 func (r *OrderRouteController) OrderRoute(rg *gin.RouterGroup) {
 	router := rg.Group("/orders")
 	router.POST("/CreateOrder", r.orderController.CreateOrder)
-	router.GET("/GetOrder:id", r.orderController.GetOrder)
+	router.GET("/GetOrder", r.orderController.GetOrder)
 	router.POST("/UpdateOrder", r.orderController.UpdateOrder)
 	router.DELETE("/DeleteOrder:id", r.orderController.DeleteOrder)
 }
