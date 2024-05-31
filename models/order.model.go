@@ -8,26 +8,27 @@ import (
 
 // Order represents an order in the database
 type Order struct {
-	ID               uint      `gorm:"type:autoIncrement;primaryKey;uniqueIndex"`
-	OrderDate        time.Time `gorm:"not null"`
-	Status           int       `gorm:"not null"`
-	CustomerName     string    `gorm:"type:varchar(255);not null"`
-	Location         string    `gorm:"not null"`
-	DeliveryType     int       `gorm:"not null"`
-	TotalPrice       int       `gorm:"not null"`
-	Discount         string    `gorm:"type:varchar(55);"`
-	SetProductID     uuid.UUID `gorm:"type:uuid;not null"`
-	CustomerID       uuid.UUID `gorm:"type:uuid;not null"`
-	UserID           uuid.UUID `gorm:"type:uuid;not null"`
-	Phone            string    `gorm:"type:varchar(10)"`
-	Postcode         int       `gorm:"not null"`
-	Platform         string    `gorm:"not null"`
-	SetProductName   string    `gorm:"type:varchar(55);not null"`
-	Amount           int       `gorm:"not null"`
-	Type             string    `gorm:"type:varchar(55);not null"`
-	Price            float64   `gorm:"not null"`
-	PaymentType      int       `gorm:"not null"`
-	LastPricePayment float64   `gorm:"not null"`
+	ID               uint          `gorm:"type:autoIncrement;primaryKey;uniqueIndex"`
+	OrderDate        time.Time     `gorm:"not null"`
+	Status           int           `gorm:"not null"`
+	CustomerName     string        `gorm:"type:varchar(255);not null"`
+	Location         string        `gorm:"not null"`
+	DeliveryType     int           `gorm:"not null"`
+	TotalPrice       int           `gorm:"not null"`
+	Discount         string        `gorm:"type:varchar(55);"`
+	SetProductID     uuid.UUID     `gorm:"type:uuid;not null"`
+	CustomerID       uuid.UUID     `gorm:"type:uuid;not null"`
+	UserID           uuid.UUID     `gorm:"type:uuid;not null"`
+	Phone            string        `gorm:"type:varchar(10)"`
+	Postcode         int           `gorm:"not null"`
+	Platform         string        `gorm:"not null"`
+	SetProductName   string        `gorm:"type:varchar(55);not null"`
+	Amount           int           `gorm:"not null"`
+	Type             string        `gorm:"type:varchar(55);not null"`
+	Price            float64       `gorm:"not null"`
+	PaymentType      int           `gorm:"not null"`
+	LastPricePayment float64       `gorm:"not null"`
+	ListProducts     []OrderDetail `gorm:"foreignKey:OrderID"`
 }
 type CreateOrder struct {
 	OrderDate time.Time `json:"order_date"`
@@ -117,13 +118,14 @@ type GetOrder struct {
 	Platform     string    `json:"platform"`
 
 	//Getorder Setproduct
-	SetProductID   uuid.UUID `json:"set_product_id"`
-	SetProductName string    `json:"set_product_name"`
-	Amount         int       `json:"set_product_amount"`
-	Type           string    `json:"set_product_type"`
-	Price          float64   `json:"set_product_price"`
-	Discount       string    `json:"discount"`
-	TotalPrice     int       `json:"total_price"`
+	SetProductID   uuid.UUID      `json:"set_product_id"`
+	SetProductName string         `json:"set_product_name"`
+	Amount         int            `json:"set_product_amount"`
+	Type           string         `json:"set_product_type"`
+	Price          float64        `json:"set_product_price"`
+	Discount       string         `json:"discount"`
+	TotalPrice     int            `json:"total_price"`
+	ListProducts   []ListProducts `json:"list_products"`
 
 	//Getorder Delivery
 	DeliveryType int `json:"delivery_type"`
@@ -136,4 +138,22 @@ type GetOrder struct {
 // DeleteOrder represents the payload for deleting an order
 type DeleteOrder struct {
 	ID uint `json:"id" binding:"required"`
+}
+
+type RequestOrderCreate struct {
+	OrderID          int       `gorm:"not null"`
+	SetProductID     uuid.UUID `gorm:"type:uuid;not null"`
+	Amount           int       `gorm:"not null"`
+}
+type RequestOrderUpdate struct {
+
+}
+type RequestOrderGetByID struct {
+
+}
+type RequestOrderGetList struct {
+
+}
+type ResponseOrderGetList struct {
+
 }

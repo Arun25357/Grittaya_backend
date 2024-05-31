@@ -202,74 +202,74 @@ func (pc *OrderController) UpdateOrder(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "200", "message": "Order updated successfully"})
-
-	// // Retrieve customer details
-	// var customer models.Customer
-	// if err := pc.DB.First(&customer, payload.CustomerID).Error; err != nil {
-	// 	ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to retrieve customer"})
-	// 	return
-	// }
-
-	// Search for the product by name
-	// var setproduct models.SetProduct
-	// if err := pc.DB.First(&setproduct, "name = ?", payload.SetProductName).Error; err != nil {
-	// 	ctx.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
-	// 	return
-	// }
-
-	// Create the update order struct
-	// for i := 0; i < len(payload.ListProducts); i++ {
-	// 	var e = payload.ListProducts[i]
-	// 	var setproduct models.SetProduct
-	// 	if err := pc.DB.First(&setproduct, "name = ?", e.SetProductName).Error; err != nil {
-	// 		ctx.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
-	// 		return
-	// 	}
-	// }
-
-	// amount := 0
-	// for _, product := range payload.ListProducts {
-	// 	amount += product.Amount
-	// }
-
-	// newOrder := models.Order{
-	// 	ID:           payload.ID,
-	// 	OrderDate:    payload.OrderDate,
-	// 	Status:       0,
-	// 	CustomerName: payload.CustomerName,
-	// 	Location:     payload.Location,
-	// 	Platform:     payload.Platform,
-	// 	DeliveryType: payload.DeliveryType,
-	// 	TotalPrice:   payload.TotalPrice,
-	// 	Discount:     payload.Discount,
-	// 	// CustomerID:       customer.ID,
-	// 	Phone:            payload.Phone,
-	// 	UserID:           payload.UserID,
-	// 	Postcode:         payload.Postcode,
-	// 	Amount:           amount,
-	// 	PaymentType:      payload.PaymentType,
-	// 	LastPricePayment: payload.LastPricePayment,
-	// }
-
-	// if err := pc.DB.First(&order, "ID = ?", newOrder).Error; err != nil {
-	// 	ctx.JSON(http.StatusBadGateway, gin.H{"status": "400", "message": "Order not found"})
-	// 	return
-	// }
-
-	// if err := pc.DB.Model(&order).Where("ID = ?", newOrder.ID).Updates(newOrder).Error; err != nil {
-	// 	ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to update Order"})
-	// 	return
-	// }
-
-	// if err := pc.DB.Delete(&newOrder).Error; err != nil {
-	// 	ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "An error occurred while logging out"})
-	// 	return
-	// }
-
-	// ctx.JSON(http.StatusOK, gin.H{"status": "200", "message": "Order updated successfully"})
 }
 
-func (pc *OrderController) GetOrder(ctx *gin.Context) {
+// // Retrieve customer details
+// var customer models.Customer
+// if err := pc.DB.First(&customer, payload.CustomerID).Error; err != nil {
+// 	ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to retrieve customer"})
+// 	return
+// }
+
+// Search for the product by name
+// var setproduct models.SetProduct
+// if err := pc.DB.First(&setproduct, "name = ?", payload.SetProductName).Error; err != nil {
+// 	ctx.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
+// 	return
+// }
+
+// Create the update order struct
+// for i := 0; i < len(payload.ListProducts); i++ {
+// 	var e = payload.ListProducts[i]
+// 	var setproduct models.SetProduct
+// 	if err := pc.DB.First(&setproduct, "name = ?", e.SetProductName).Error; err != nil {
+// 		ctx.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
+// 		return
+// 	}
+// }
+
+// amount := 0
+// for _, product := range payload.ListProducts {
+// 	amount += product.Amount
+// }
+
+// newOrder := models.Order{
+// 	ID:           payload.ID,
+// 	OrderDate:    payload.OrderDate,
+// 	Status:       0,
+// 	CustomerName: payload.CustomerName,
+// 	Location:     payload.Location,
+// 	Platform:     payload.Platform,
+// 	DeliveryType: payload.DeliveryType,
+// 	TotalPrice:   payload.TotalPrice,
+// 	Discount:     payload.Discount,
+// 	// CustomerID:       customer.ID,
+// 	Phone:            payload.Phone,
+// 	UserID:           payload.UserID,
+// 	Postcode:         payload.Postcode,
+// 	Amount:           amount,
+// 	PaymentType:      payload.PaymentType,
+// 	LastPricePayment: payload.LastPricePayment,
+// }
+
+// if err := pc.DB.First(&order, "ID = ?", newOrder).Error; err != nil {
+// 	ctx.JSON(http.StatusBadGateway, gin.H{"status": "400", "message": "Order not found"})
+// 	return
+// }
+
+// if err := pc.DB.Model(&order).Where("ID = ?", newOrder.ID).Updates(newOrder).Error; err != nil {
+// 	ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to update Order"})
+// 	return
+// }
+
+// if err := pc.DB.Delete(&newOrder).Error; err != nil {
+// 	ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "An error occurred while logging out"})
+// 	return
+// }
+
+// ctx.JSON(http.StatusOK, gin.H{"status": "200", "message": "Order updated successfully"})
+
+func (oc *OrderController) GetOrder(ctx *gin.Context) {
 	// Parse query parameters
 	pageStr := ctx.DefaultQuery("page", "1")
 	page, err := strconv.Atoi(pageStr)
@@ -284,12 +284,21 @@ func (pc *OrderController) GetOrder(ctx *gin.Context) {
 		return
 	}
 
-	// Get total number of tickets
+	// orders2 := []models.Order{}
+	// if err := oc.DB.Find(&orders2).Error; err != nil {
+	// 	ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to get total number of orders"})
+	// 	return
+	// }
+
+	// Get total number of orders
 	var totalCount int64
-	if err := pc.DB.Model(&models.Order{}).Count(&totalCount).Error; err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to get total number of products"})
+	if err := oc.DB.Model(&models.Order{}).Count(&totalCount).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to get total number of orders"})
 		return
 	}
+
+	ctx.JSON(http.StatusInternalServerError, gin.H{"status": "200", "data": totalCount})
+	return
 
 	// Calculate offset and limit for pagination
 	offset := (page - 1) * perPage
@@ -297,57 +306,58 @@ func (pc *OrderController) GetOrder(ctx *gin.Context) {
 
 	// Retrieve orders based on pagination
 	var orders []models.Order
-	if err := pc.DB.Offset(offset).Limit(limit).Find(&orders).Error; err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to retrieve product"})
+	if err := oc.DB.Offset(offset).Limit(limit).Preload("ListProducts").Find(&orders).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to retrieve orders"})
 		return
 	}
 
 	// Convert retrieved orders to response format
-	var getOrders []*models.GetOrder
-	for _, payload := range orders {
-		// Retrieve set product details
-		var setproduct models.SetProduct
-		if err := pc.DB.First(&setproduct, payload.SetProductID).Error; err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to retrieve set product"})
-			return
-		}
+	// var getOrders []*models.GetOrder
+	// for _, order := range orders {
+	// 	// Retrieve set product details
+	// 	var setproduct models.SetProduct
+	// 	if err := oc.DB.First(&setproduct, order.SetProductID).Error; err != nil {
+	// 		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to retrieve set product"})
+	// 		return
+	// 	}
 
-		// // Retrieve customer details
-		// var customer models.CustomerID
-		// if err := pc.DB.First(&customer, payload.CustomerID).Error; err != nil {
-		// 	ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to retrieve customer"})
-		// 	return
-		// }
+	// 	// Check if the customer exists
+	// 	var customer models.Customer
+	// 	if err := oc.DB.First(&customer, "name = ?", order.CustomerName).Error; err != nil {
+	// 		ctx.JSON(http.StatusNotFound, gin.H{"error": "Customer not found"})
+	// 		return
+	// 	}
 
-		getOrder := &models.GetOrder{
-			// ID:               uint(wd),
-			OrderDate:        payload.OrderDate,
-			Status:           0,
-			CustomerName:     payload.CustomerName,
-			Location:         payload.Location,
-			Platform:         payload.Platform,
-			DeliveryType:     payload.DeliveryType,
-			TotalPrice:       payload.TotalPrice,
-			Discount:         payload.Discount,
-			Phone:            payload.Phone,
-			UserID:           payload.UserID,
-			Postcode:         payload.Postcode,
-			// Amount:           amount,
-			PaymentType:      payload.PaymentType,
-			LastPricePayment: payload.LastPricePayment,
-		}
-		getOrders = append(getOrders, getOrder)
-	}
+	// 	// Create GetOrder instance
+	// 	getOrder := &models.GetOrder{
+	// 		OrderDate:        order.OrderDate,
+	// 		Status:           order.Status,
+	// 		CustomerName:     order.CustomerName,
+	// 		Location:         order.Location,
+	// 		Platform:         order.Platform,
+	// 		DeliveryType:     order.DeliveryType,
+	// 		TotalPrice:       order.TotalPrice,
+	// 		Discount:         order.Discount,
+	// 		Phone:            order.Phone,
+	// 		UserID:           order.UserID,
+	// 		Postcode:         order.Postcode,
+	// 		Amount:           order.Amount,
+	// 		PaymentType:      order.PaymentType,
+	// 		LastPricePayment: order.LastPricePayment,
+	// 		ListProducts:     order.ListProducts, // Include ListProducts
+	// 	}
+	// 	getOrders = append(getOrders, getOrder)
+	// }
 
-	// Return paginated orders
-	ctx.JSON(http.StatusOK, gin.H{"status": "200", "data": gin.H{
-		"orders":      getOrders,
-		"totalCount":  totalCount,
-		"currentPage": page,
-		"perPage":     perPage,
-		"nextPage":    fmt.Sprintf("?page=%d&perPage=%d", page+1, perPage),
-		"prevPage":    fmt.Sprintf("?page=%d&perPage=%d", page-1, perPage),
-	}})
+	// // Return paginated orders
+	// ctx.JSON(http.StatusOK, gin.H{"status": "200", "data": gin.H{
+	// 	"orders":      getOrders,
+	// 	"totalCount":  totalCount,
+	// 	"currentPage": page,
+	// 	"perPage":     perPage,
+	// 	"nextPage":    fmt.Sprintf("?page=%d&perPage=%d", page+1, perPage),
+	// 	"prevPage":    fmt.Sprintf("?page=%d&perPage=%d", page-1, perPage),
+	// }})
 }
 
 func (ctrl *OrderController) DeleteOrder(c *gin.Context) {
