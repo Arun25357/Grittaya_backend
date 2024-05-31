@@ -284,21 +284,23 @@ func (oc *OrderController) GetOrder(ctx *gin.Context) {
 		return
 	}
 
-	// orders2 := []models.Order{}
-	// if err := oc.DB.Find(&orders2).Error; err != nil {
+	orders2 := []models.Order{}
+	if err := oc.DB.Find(&orders2).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to get total number of orders"})
+		return
+	}
+	ctx.JSON(http.StatusInternalServerError, gin.H{"status": "200", "data": orders2})
+	return
+
+	// Get total number of orders
+	// var totalCount int64
+	// if err := oc.DB.Model(&models.Order{}).Count(&totalCount).Error; err != nil {
 	// 	ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to get total number of orders"})
 	// 	return
 	// }
 
-	// Get total number of orders
-	var totalCount int64
-	if err := oc.DB.Model(&models.Order{}).Count(&totalCount).Error; err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to get total number of orders"})
-		return
-	}
-
-	ctx.JSON(http.StatusInternalServerError, gin.H{"status": "200", "data": totalCount})
-	return
+	// ctx.JSON(http.StatusInternalServerError, gin.H{"status": "200", "data": totalCount})
+	// return
 
 	// Calculate offset and limit for pagination
 	offset := (page - 1) * perPage

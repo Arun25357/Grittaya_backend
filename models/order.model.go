@@ -145,15 +145,15 @@ type RequestOrderCreate struct {
 	SetProductID     uuid.UUID `gorm:"type:uuid;not null"`
 	Amount           int       `gorm:"not null"`
 }
-type RequestOrderUpdate struct {
+// type RequestOrderUpdate struct {
 
-}
-type RequestOrderGetByID struct {
+// }
+// type RequestOrderGetByID struct {
 
-}
-type RequestOrderGetList struct {
+// }
+// type RequestOrderGetList struct {
 
-}
-type ResponseOrderGetList struct {
+// }
+// type ResponseOrderGetList struct {
 
-}
+// }
