@@ -28,6 +28,7 @@ type Order struct {
 	Price            float64       `gorm:"not null"`
 	PaymentType      int           `gorm:"not null"`
 	LastPricePayment float64       `gorm:"not null"`
+	// Balance          float64       `gorm:"not null"`
 	ListProducts     []OrderDetail `gorm:"foreignKey:OrderID"`
 }
 type CreateOrder struct {
@@ -70,6 +71,8 @@ type ListProducts struct {
 	TotalPrice     int       `json:"total_price"`
 }
 
+// type Balance struct {
+// }
 type UpdateOrder struct {
 	ID        uint      `json:"order_id" uri:"id"`
 	OrderDate time.Time `json:"order_date"`
@@ -137,23 +140,20 @@ type GetOrder struct {
 
 // DeleteOrder represents the payload for deleting an order
 type DeleteOrder struct {
-	ID uint `json:"id" binding:"required"`
+	ID uint `json:"order_id"`
 }
 
-type RequestOrderCreate struct {
-	OrderID          int       `gorm:"not null"`
-	SetProductID     uuid.UUID `gorm:"type:uuid;not null"`
-	Amount           int       `gorm:"not null"`
-}
+// type RequestOrderCreate struct {
+// 	ID           uint      `json:"id" binding:"required"`
+// 	OrderID      int       `gorm:"not null"`
+// 	SetProductID uuid.UUID `gorm:"type:uuid;not null"`
+// 	Amount       int       `gorm:"not null"`
+// }
 // type RequestOrderUpdate struct {
-
 // }
 // type RequestOrderGetByID struct {
-
 // }
 // type RequestOrderGetList struct {
-
 // }
 // type ResponseOrderGetList struct {
-
 // }
