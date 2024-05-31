@@ -13,7 +13,6 @@ import (
 	"strconv"
 
 	"github.com/Pure227/Grittaya_backend/models"
-
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -100,13 +99,7 @@ func (pc *ProductController) GetProducts(ctx *gin.Context) {
 	}
 
 	fmt.Println(req.ID)
-	// productIDStr := ctx.Query("productID")
-	// productID, err := strconv.Atoi(productIDStr)
-	// if err != nil || productID < 1 {
-	// 	ctx.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": "Invalid product ID"})
-	// 	return
-	// }
-
+	
 	// Retrieve the product
 	var product models.Product
 
@@ -121,17 +114,6 @@ func (pc *ProductController) GetProducts(ctx *gin.Context) {
 		fmt.Println(err)
 		return
 	}
-
-	// fmt.Println(2)
-	// if err := pc.DB.First(&product, req.ID).Error; err != nil {
-	// 	if errors.Is(err, gorm.ErrRecordNotFound) {
-	// 		ctx.JSON(http.StatusNotFound, gin.H{"status": "404", "message": "Product not found"})
-	// 	} else {
-	// 		fmt.Println(err)
-	// 		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to retrieve the product"})
-	// 	}
-	// 	return
-	// }
 
 	// Convert the product to response format
 	getProduct := &models.GetProduct{
@@ -150,63 +132,6 @@ func (pc *ProductController) GetProducts(ctx *gin.Context) {
 
 func (pc *ProductController) CreateProduct(ctx *gin.Context) {
 	var payload models.CreateProduct
-	// file, err := ctx.FormFile("attach_file")
-	// log.Print(file.Filename)
-
-	// // Check if file was uploaded
-	// var attachFile string
-	// if err != nil {
-	// 	if err != http.ErrMissingFile {
-	// 		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to upload file"})
-	// 		return
-	// 	}
-	// 	// No file uploaded
-	// 	attachFile = ""
-	// } else {
-	// 	// Process file data
-	// 	ext := filepath.Ext(file.Filename)
-	// 	originalFileName := strings.TrimSuffix(filepath.Base(file.Filename), filepath.Ext(file.Filename))
-	// 	path := "public/product"
-
-	// 	// Check if the file extension is valid
-	// 	validExtensions := []string{".jpg", ".jpeg", ".png", ".gif"}
-	// 	validExtension := false
-	// 	for _, validExt := range validExtensions {
-	// 		if strings.EqualFold(ext, validExt) {
-	// 			validExtension = true
-	// 			break
-	// 		}
-	// 	}
-
-	// 	if !validExtension {
-	// 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": "Invalid file extension"})
-	// 		return
-	// 	}
-
-	// 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
-	// 		err := os.Mkdir(path, os.ModePerm)
-	// 		if err != nil {
-	// 			log.Println(err)
-	// 			ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to create directory"})
-	// 			return
-	// 		}
-	// 	}
-
-	// 	if err := os.MkdirAll(path, os.ModePerm); err != nil {
-	// 		log.Println(err)
-	// 		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to create directory"})
-	// 		return
-	// 	}
-
-	// 	pathWithTime := path + "/" + strconv.FormatInt(time.Now().Unix(), 10) + "_" + originalFileName + ext
-	// 	attachFile = pathWithTime
-
-	// 	// Save the uploaded file
-	// 	if err := ctx.SaveUploadedFile(file, pathWithTime); err != nil {
-	// 		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to save file"})
-	// 		return
-	// 	}
-	// }
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
 		log.Println("Error binding JSON:", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

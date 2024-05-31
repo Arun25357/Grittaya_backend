@@ -25,5 +25,6 @@ func main() {
 	initializers.DB.AutoMigrate(&models.SetProduct{})
 	initializers.DB.AutoMigrate(&models.Discount{})
 	initializers.DB.AutoMigrate(&models.Token{})
+	initializers.DB.AutoMigrate(&models.OrderDetail{})
 	fmt.Println("? Migration complete")
 }

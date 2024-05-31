@@ -22,20 +22,20 @@ func (cc *CustomerController) CreateCustomer(ctx *gin.Context) {
 		return
 	}
 
-	var existingCustomer models.Customer
-	if err := cc.DB.Where("phone = ?", payload.Phone).First(&existingCustomer).Error; err == nil {
-		// Phone number found in the database
-		ctx.JSON(http.StatusOK, gin.H{
-			"name":     existingCustomer.Name,
-			"location": existingCustomer.Location,
-			"postcode": existingCustomer.Postcode,
-		})
-		return
-	} else if err != gorm.ErrRecordNotFound {
-		// An error occurred during the query
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
-		return
-	}
+	// var existingCustomer models.Customer
+	// if err := cc.DB.Where("phone = ?", payload.Phone).First(&existingCustomer).Error; err == nil {
+	// 	// Phone number found in the database
+	// 	ctx.JSON(http.StatusOK, gin.H{
+	// 		"name":     existingCustomer.Name,
+	// 		"location": existingCustomer.Location,
+	// 		"postcode": existingCustomer.Postcode,
+	// 	})
+	// 	return
+	// } else if err != gorm.ErrRecordNotFound {
+	// 	// An error occurred during the query
+	// 	ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+	// 	return
+	// }
 
 	// Phone number not found, create a new customer
 	newCustomer := models.Customer{
@@ -43,6 +43,7 @@ func (cc *CustomerController) CreateCustomer(ctx *gin.Context) {
 		Phone:    payload.Phone,
 		Location: payload.Location,
 		Postcode: payload.Postcode,
+		Platform: payload.Platform,
 	}
 
 	if err := cc.DB.Create(&newCustomer).Error; err != nil {
@@ -52,8 +53,9 @@ func (cc *CustomerController) CreateCustomer(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"name":     newCustomer.Name,
+		"phone":    newCustomer.Phone,
 		"location": newCustomer.Location,
 		"postcode": newCustomer.Postcode,
+		"platform": newCustomer.Platform,
 	})
 }
-
