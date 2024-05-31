@@ -1,7 +1,7 @@
 package models
 
 import (
-	uuid "github.com/satori/go.uuid"
+    uuid "github.com/satori/go.uuid"
 )
 
 type SetProduct struct {
@@ -14,31 +14,31 @@ type SetProduct struct {
 }
 
 type CreateSetProduct struct {
-	Name   string  `json:"set_product_name"`
-	Amount int     `json:"set_product_amount"`
-	Price  float64 `json:"set_product_price"`
-	Status int     `json:"status"`
-	Type   string  `json:"set_product_type"`
+	Name      string    `json:"name" binding:"required"`
+	Amount    int       `json:"amount" binding:"required"`
+	Price     float64   `json:"price" binding:"required"`
+	Status    int       `json:"status" binding:"required"`
+	Type      string    `json:"setproduct_type"`
 }
 
 type UpdateSetProduct struct {
-	ID     uuid.UUID `json:"id"`
-	Name   string    `json:"set_product_name"`
-	Amount int       `json:"set_product_amount"`
-	Price  float64   `json:"set_product_price"`
-	Status int       `json:"status"`
-	Type   string    `json:"set_product_type"`
+	ID        uuid.UUID `json:"id" binding:"required"`
+	Name      string    `json:"name"`
+	Amount    int       `json:"amount"`
+	Price     float64   `json:"price"`
+	Status    int       `json:"status"`
+	Type      string    `json:"setproduct_type"`
 }
 
 type GetSetProduct struct {
-	ID     uuid.UUID `json:"id"`
-	Name   string    `json:"set_product_name"`
-	Amount int       `json:"set_product_amount"`
-	Price  float64   `json:"set_product_price"`
-	Status int       `json:"status"`
-	Type   string    `json:"set_product_type"`
+	ID        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	Amount    int       `json:"amount"`
+	Price     float64   `json:"price"`
+	Status    int       `json:"status"`
+	Type      string    `json:"setproduct_type"`
 }
 
 type DeleteSetProduct struct {
-	ID uuid.UUID `json:"id" binding:"required"`
+    ID uuid.UUID `json:"id" binding:"required"`
 }

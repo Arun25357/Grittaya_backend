@@ -18,5 +18,6 @@ func (r *SetProductRouteController) SetProductRoutes(rg *gin.RouterGroup) {
 	router.POST("/CreateSetProduct", r.setProductController.CreateSetProduct)
 	router.GET("/GetSetProduct:id", r.setProductController.GetSetProduct)
 	router.POST("/UpdateSetProduct", r.setProductController.UpdateSetProduct)
-	router.DELETE("/DeleteSetProduct:id", r.setProductController.DeleteSetProduct)
+	router.DELETE("/DeleteSetProduct", r.setProductController.DeleteSetProduct)
+	router.GET("/GetAllSetProduct", r.setProductController.GetAllSetProducts)
 }

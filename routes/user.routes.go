@@ -20,9 +20,3 @@ func (uc *UserRouteController) UserRoute(rg *gin.RouterGroup) {
 
 }
 
-// func (uc *UserRouteController) test(rg *gin.RouterGroup) {
-// 	router := rg.Group("/users")
-// 	// router.GET("/profile", middleware.MiddlewareUser(), uc.userController.GetUser)
-// 	router.GET("/test", uc.userController.Test)
-
-// }
