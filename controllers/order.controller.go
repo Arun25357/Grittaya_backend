@@ -373,26 +373,64 @@ func (oc *OrderController) GetOrder(ctx *gin.Context) {
 //		c.Status(http.StatusNoContent)
 //	}func (pc *ProductController) DeleteProduct(ctx *gin.Context) {
 func (oc *OrderController) DeleteOrder(ctx *gin.Context) {
-	var order models.Order
-	var payload *models.DeleteOrder
-	if err := ctx.ShouldBindJSON(&payload); err != nil {
+	var id GetOrder
+	
+	if err := ctx.BindUri(&id); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": err.Error()})
 		return
 	}
+	
+	var order []models.OrderDetail
+	var order2 []models.Order
+	if err := oc.DB.Where("order_id = ?", id.ID).Find(&order).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"status": "404", "message": "Product not found"})
+			fmt.Println(err)
+			return
+		}
 
-	deleteOrder := models.Order{
-		ID: payload.ID,
-	}
-
-
-	if err := oc.DB.First(&order, "ID = ?", deleteOrder.ID).Delete(&order).Error; err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": "Product not found"})
+		fmt.Println(order)
+		fmt.Println(err)
 		return
 	}
-	if err := oc.DB.First(&order, "ID = ?", deleteOrder.ID).Delete(&order).Error; err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": "Product not found"})
+
+	if len(order) > 0 {
+		if err := oc.DB.Delete(&order).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				ctx.JSON(http.StatusNotFound, gin.H{"status": "404", "message": "Product not found"})
+				fmt.Println(err)
+				return
+			}
+
+			fmt.Println(2)
+			fmt.Println(err)
+			return
+		}
+	}
+	if err := oc.DB.Where("id = ?", id.ID).Find(&order2).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"status": "404", "message": "Product not found"})
+			fmt.Println(err)
+			return
+		}
+
+		fmt.Println(order)
+		fmt.Println(err)
 		return
 	}
+	
+	if len(order2) > 0 {
+		if err := oc.DB.Delete(&order2).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				ctx.JSON(http.StatusNotFound, gin.H{"status": "404", "message": "Product not found"})
+				fmt.Println(err)
+				return
+			}
 
+			fmt.Println(2)
+			fmt.Println(err)
+			return
+		}
+	}
 	ctx.JSON(http.StatusOK, gin.H{"status": "200", "message": "Product deleted successfully"})
 }
