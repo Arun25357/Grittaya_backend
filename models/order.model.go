@@ -137,23 +137,20 @@ type GetOrder struct {
 
 // DeleteOrder represents the payload for deleting an order
 type DeleteOrder struct {
-	ID uint `json:"id" binding:"required"`
+	ID uint `json:"id"`
 }
 
-type RequestOrderCreate struct {
-	OrderID          int       `gorm:"not null"`
-	SetProductID     uuid.UUID `gorm:"type:uuid;not null"`
-	Amount           int       `gorm:"not null"`
-}
-type RequestOrderUpdate struct {
-
-}
-type RequestOrderGetByID struct {
-
-}
-type RequestOrderGetList struct {
-
-}
-type ResponseOrderGetList struct {
-
-}
+// type RequestOrderCreate struct {
+// 	ID           uint      `json:"id" binding:"required"`
+// 	OrderID      int       `gorm:"not null"`
+// 	SetProductID uuid.UUID `gorm:"type:uuid;not null"`
+// 	Amount       int       `gorm:"not null"`
+// }
+// type RequestOrderUpdate struct {
+// }
+// type RequestOrderGetByID struct {
+// }
+// type RequestOrderGetList struct {
+// }
+// type ResponseOrderGetList struct {
+// }
