@@ -310,7 +310,6 @@ func (oc *OrderController) GetOrder(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "500", "message": "Failed to retrieve orders"})
 		return
 	}
-
 	// Convert retrieved orders to response format
 	// var getOrders []*models.GetOrder
 	// for _, order := range orders {
@@ -360,16 +359,40 @@ func (oc *OrderController) GetOrder(ctx *gin.Context) {
 	// }})
 }
 
-func (ctrl *OrderController) DeleteOrder(c *gin.Context) {
-	id := c.Param("id")
-	if err := ctrl.DB.Where("id = ?", id).Delete(&models.Order{}).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Order not found"})
-			return
-		}
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+// func (ctrl *OrderController) DeleteOrder(c *gin.Context) {
+// 	id := c.Param("id")
+// 	if err := ctrl.DB.Where("id = ?", id).Delete(&models.Order{}).Error; err != nil {
+// 		if err == gorm.ErrRecordNotFound {
+// 			c.JSON(http.StatusNotFound, gin.H{"error": "Order not found"})
+// 			return
+// 		}
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+// 		return
+// 	}
+
+//		c.Status(http.StatusNoContent)
+//	}func (pc *ProductController) DeleteProduct(ctx *gin.Context) {
+func (oc *OrderController) DeleteOrder(ctx *gin.Context) {
+	var order models.Order
+	var payload *models.DeleteOrder
+	if err := ctx.ShouldBindJSON(&payload); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": err.Error()})
 		return
 	}
 
-	c.Status(http.StatusNoContent)
+	deleteOrder := models.Order{
+		ID: payload.ID,
+	}
+
+
+	if err := oc.DB.First(&order, "ID = ?", deleteOrder.ID).Delete(&order).Error; err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": "Product not found"})
+		return
+	}
+	if err := oc.DB.First(&order, "ID = ?", deleteOrder.ID).Delete(&order).Error; err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "400", "message": "Product not found"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "200", "message": "Product deleted successfully"})
 }
